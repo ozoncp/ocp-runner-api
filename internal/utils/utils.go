@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/pkg/math"
 )
@@ -23,18 +24,24 @@ func SplitSlice(source []interface{}, batchSize int) [][]interface{} {
 }
 
 // SwapKeyValue returns new map where keys are swapped with values
-func SwapKeyValue(source map[int]string) (map[string]int, bool) {
-	result := make(map[string]int, len(source))
+func SwapKeyValue(source map[int]string) (result map[string]int, err error) {
+	result = make(map[string]int, len(source))
+
+	defer func() {
+		if ex := recover(); ex != nil {
+			err = errors.New(ex.(string))
+			result = nil
+		}
+	}()
 
 	for key, value := range source {
 		if _, found := result[value]; found {
-			fmt.Printf("Key %v already exist in result map!", value)
-			return nil, false
+			panic(fmt.Sprintf("Key %v already exist in result map!", value))
 		}
 		result[value] = key
 	}
 
-	return result, true
+	return result, err
 }
 
 // SliceExcept returns new slice without specified values

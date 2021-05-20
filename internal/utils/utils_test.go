@@ -23,9 +23,9 @@ func TestSwapKeyValue(t *testing.T) {
 		3: "three",
 	}
 
-	result, ok := SwapKeyValue(source)
+	result, err := SwapKeyValue(source)
 
-	assert.True(t, ok)
+	assert.Nil(t, err)
 	for key, value := range result {
 		assert.Equal(t, key, source[value])
 		assert.Equal(t, value, getKey(source, key))
@@ -38,8 +38,8 @@ func TestSwapKeyValue(t *testing.T) {
 		3: "banana",
 	}
 
-	badResult, ok := SwapKeyValue(badSource)
-	assert.False(t, ok)
+	badResult, err := SwapKeyValue(badSource)
+	assert.Error(t, err)
 	assert.Nil(t, badResult)
 }
 
