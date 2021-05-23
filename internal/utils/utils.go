@@ -3,29 +3,30 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/ozoncp/ocp-runner-api/internal/models"
 	"github.com/pkg/math"
 )
 
-// SplitSlice split the source slice into the slice of slices
-func SplitSlice(source []interface{}, batchSize int) [][]interface{} {
-	var result [][]interface{}
+// SplitToBulks split the source slice into the slice of slices
+func SplitToBulks(source []*models.Runner, batchSize int) [][]*models.Runner {
+	var result [][]*models.Runner
 	var from, to int
 
 	for {
 		if from == len(source) {
 			break
 		}
-		to = math.Min(from + batchSize, len(source))
-		result = append(result, source[from: to])
+		to = math.Min(from+batchSize, len(source))
+		result = append(result, source[from:to])
 		from = to
 	}
 
 	return result
 }
 
-// SwapKeyValue returns new map where keys are swapped with values
-func SwapKeyValue(source map[int]string) (result map[string]int, err error) {
-	result = make(map[string]int, len(source))
+// GroupByGuid returns map of runners grouped by unique guid
+func GroupByGuid(runners []*models.Runner) (result map[string]*models.Runner, err error) {
+	result = make(map[string]*models.Runner, len(runners))
 
 	defer func() {
 		if ex := recover(); ex != nil {
@@ -34,11 +35,11 @@ func SwapKeyValue(source map[int]string) (result map[string]int, err error) {
 		}
 	}()
 
-	for key, value := range source {
-		if _, found := result[value]; found {
-			panic(fmt.Sprintf("Key %v already exist in result map!", value))
+	for _, runner := range runners {
+		if _, found := result[runner.Guid]; found {
+			panic(fmt.Sprintf("Guid %v already exist in result map!", runner.Guid))
 		}
-		result[value] = key
+		result[runner.Guid] = runner
 	}
 
 	return result, err
