@@ -49,6 +49,12 @@ func TestGroupByGuid(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, badResult)
+
+	// Empty case
+	emptyResult, err := GroupByGuid(nil)
+
+	assert.Nil(t, emptyResult)
+	assert.Error(t, err)
 }
 
 func TestSliceExcept(t *testing.T) {
