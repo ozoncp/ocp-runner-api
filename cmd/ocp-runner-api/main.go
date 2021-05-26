@@ -34,3 +34,17 @@ func main() {
 
 	fmt.Printf("%v by %v", config.Project, config.Author)
 }
+
+func openFileLoop(path string) {
+	for i := 0; i < 5; i++ {
+		file, err := os.Open(path)
+		if err != nil {
+			fmt.Errorf("failed to open config file, error: %w", err)
+			break
+		}
+		defer file.Close()
+
+		fi, _ := file.Stat()
+		fmt.Printf("%v. file is %d bytes long", i, fi.Size())
+	}
+}

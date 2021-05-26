@@ -9,7 +9,7 @@ import (
 func TestSplitToBulks(t *testing.T) {
 	source := make([]*models.Runner, 11)
 	for i := 0; i < len(source)-1; i++ {
-		source[i] = models.NewRunner()
+		source[i] = models.NewDefault()
 	}
 
 	result := SplitToBulks(source, 2)
@@ -22,12 +22,9 @@ func TestSplitToBulks(t *testing.T) {
 func TestGroupByGuid(t *testing.T) {
 	// Good case
 	source := []*models.Runner{
-		models.NewRunner(),
-		models.NewRunner(),
-		models.NewRunner(),
-	}
-	for _, runner := range source {
-		runner.InitDefaults()
+		models.NewDefault(),
+		models.NewDefault(),
+		models.NewDefault(),
 	}
 
 	result, err := GroupByGuid(source)
@@ -37,12 +34,9 @@ func TestGroupByGuid(t *testing.T) {
 
 	// Bad case
 	badSource := []*models.Runner{
-		models.NewRunner(),
-		models.NewRunner(),
-		models.NewRunner(),
-	}
-	for _, runner := range source {
-		runner.Init("same-guid", "windows", "x64")
+		models.New("same-guid", "windows", "x64"),
+		models.New("same-guid", "linux", "x64"),
+		models.New("same-guid", "macOs", "x64"),
 	}
 
 	badResult, err := GroupByGuid(badSource)

@@ -8,22 +8,18 @@ import (
 )
 
 func TestInit(t *testing.T) {
-	runner := NewRunner()
-
 	guid, _ := uuid.NewUUID()
-	runner.Init(guid.String(), "windows", "x64")
+	runner := New(guid.String(), "windows", "x64")
 
-	assert.Equal(t, guid.String(), runner.Guid)
-	assert.Equal(t, "windows", runner.Os)
-	assert.Equal(t, "x64", runner.Arch)
+	assert.Equal(t, guid.String(), runner.GetGuid())
+	assert.Equal(t, "windows", runner.GetOs())
+	assert.Equal(t, "x64", runner.GetArch())
 }
 
 func TestInitDefaults(t *testing.T) {
-	runner := NewRunner()
+	runner := NewDefault()
 
-	runner.InitDefaults()
-
-	assert.NotEmpty(t, runner.Guid)
-	assert.Equal(t, runtime.GOOS, runner.Os)
-	assert.Equal(t, runtime.GOARCH, runner.Arch)
+	assert.NotEmpty(t, runner.GetGuid())
+	assert.Equal(t, runtime.GOOS, runner.GetOs())
+	assert.Equal(t, runtime.GOARCH, runner.GetArch())
 }
