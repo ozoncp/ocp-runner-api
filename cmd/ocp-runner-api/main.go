@@ -27,6 +27,8 @@ func main() {
 		}
 	}(file)
 
+	openFileLoop(path)
+
 	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
 		panic(err)
@@ -45,6 +47,6 @@ func openFileLoop(path string) {
 		defer file.Close()
 
 		fi, _ := file.Stat()
-		fmt.Printf("%v. file is %d bytes long", i, fi.Size())
+		fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
 	}
 }
