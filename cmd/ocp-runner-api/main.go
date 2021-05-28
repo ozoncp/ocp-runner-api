@@ -41,14 +41,20 @@ func main() {
 
 func openConfigLoop(path string) {
 	for i := 0; i < 5; i++ {
-		func(configPath string) {
+		func() {
 			file, err := os.Open(path)
 			if err != nil {
 				fmt.Errorf("failed to open config file, error: %w", err)
 				return
 			}
+			defer func(file *os.File) {
+				if closeErr := file.Close(); closeErr != nil {
+					fmt.Errorf("failed to close file, error: %w", closeErr)
+				}
+			}(file)
+
 			fi, _ := file.Stat()
 			fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
-		}(path)
+		}()
 	}
 }
