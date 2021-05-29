@@ -12,7 +12,6 @@ type Runner struct {
 	arch string
 }
 
-// for test
 // New creates new Runner instance
 func New(guid string, os string, arch string) *Runner {
 	return &Runner{guid, os, arch}
