@@ -55,7 +55,6 @@ func openConfigLoop(path string) {
 
 			fi, _ := file.Stat()
 			fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
-			fmt.Println("for test 2")
 		}()
 	}
 }
