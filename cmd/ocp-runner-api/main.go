@@ -19,12 +19,12 @@ func main() {
 	path, _ := filepath.Abs("./config.yml")
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Errorf("failed to open config file, error: %w", err)
+		fmt.Printf("failed to open config file, error: %v\n", err)
 		os.Exit(1)
 	}
 	defer func(file *os.File) {
 		if closeErr := file.Close(); closeErr != nil {
-			fmt.Errorf("failed to close file, error: %w", closeErr)
+			fmt.Printf("failed to close file, error: %v\n", closeErr)
 		}
 	}(file)
 
@@ -32,7 +32,7 @@ func main() {
 
 	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
-		fmt.Errorf("failed to parse config file, error: %w", err)
+		fmt.Printf("failed to parse config file, error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -44,17 +44,18 @@ func openConfigLoop(path string) {
 		func() {
 			file, err := os.Open(path)
 			if err != nil {
-				fmt.Errorf("failed to open config file, error: %w", err)
+				fmt.Printf("failed to open config file, error: %v\n", err)
 				return
 			}
 			defer func(file *os.File) {
 				if closeErr := file.Close(); closeErr != nil {
-					fmt.Errorf("failed to close file, error: %w", closeErr)
+					fmt.Printf("failed to close file, error: %v\n", closeErr)
 				}
 			}(file)
 
 			fi, _ := file.Stat()
 			fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
+			fmt.Println("for test 1")
 		}()
 	}
 }
