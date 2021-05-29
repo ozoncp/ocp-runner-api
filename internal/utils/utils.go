@@ -26,7 +26,7 @@ func SplitToBulks(source []*models.Runner, batchSize int) [][]*models.Runner {
 
 // GroupByGuid returns map of runners grouped by unique guid
 func GroupByGuid(runners []*models.Runner) (map[string]*models.Runner, error) {
-	if runners == nil || len(runners) == 0 {
+	if len(runners) == 0 {
 		return nil, errors.New("received nil or empty slice")
 	}
 
