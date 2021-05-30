@@ -1,10 +1,11 @@
 package models
 
 import (
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"runtime"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInit(t *testing.T) {
