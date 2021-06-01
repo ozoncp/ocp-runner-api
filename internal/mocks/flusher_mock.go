@@ -36,10 +36,10 @@ func (m *MockFlusher) EXPECT() *MockFlusherMockRecorder {
 }
 
 // Flush mocks base method.
-func (m *MockFlusher) Flush(arg0 context.Context, arg1 []models.Runner) []models.Runner {
+func (m *MockFlusher) Flush(arg0 context.Context, arg1 []*models.Runner) []*models.Runner {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Flush", arg0, arg1)
-	ret0, _ := ret[0].([]models.Runner)
+	ret0, _ := ret[0].([]*models.Runner)
 	return ret0
 }
 

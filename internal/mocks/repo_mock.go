@@ -36,7 +36,7 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // AddRunner mocks base method.
-func (m *MockRepo) AddRunner(arg0 context.Context, arg1 models.Runner) error {
+func (m *MockRepo) AddRunner(arg0 context.Context, arg1 *models.Runner) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddRunner", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -50,7 +50,7 @@ func (mr *MockRepoMockRecorder) AddRunner(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // AddRunners mocks base method.
-func (m *MockRepo) AddRunners(arg0 context.Context, arg1 []models.Runner) error {
+func (m *MockRepo) AddRunners(arg0 context.Context, arg1 []*models.Runner) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddRunners", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -64,10 +64,10 @@ func (mr *MockRepoMockRecorder) AddRunners(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // ListRunners mocks base method.
-func (m *MockRepo) ListRunners(arg0 context.Context) ([]models.Runner, error) {
+func (m *MockRepo) ListRunners(arg0 context.Context) ([]*models.Runner, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListRunners", arg0)
-	ret0, _ := ret[0].([]models.Runner)
+	ret0, _ := ret[0].([]*models.Runner)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

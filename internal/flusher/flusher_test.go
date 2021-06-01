@@ -27,8 +27,8 @@ var _ = Describe("Flusher", func() {
 
 		mockRepo *mocks.MockRepo
 
-		runners []models.Runner
-		rest    []models.Runner
+		runners []*models.Runner
+		rest    []*models.Runner
 
 		f flusher.Flusher
 
@@ -51,37 +51,37 @@ var _ = Describe("Flusher", func() {
 		ctrl.Finish()
 	})
 
-	Context("repo saves all runners", func() {
+	Context("if all is fine", func() {
 		BeforeEach(func() {
 			chunkSize = 2
-			runners = []models.Runner{{}}
+			runners = []*models.Runner{{}}
 
 			mockRepo.EXPECT().AddRunners(gomock.Any(), gomock.Any()).Return(nil).MinTimes(1)
 		})
 
-		It("", func() {
+		It("repo saves all runners", func() {
 			Expect(err).Should(BeNil())
 			Expect(rest).Should(BeNil())
 		})
 	})
 
-	Context("repo don't saves any runner", func() {
+	Context("if there is an error at the first repo call", func() {
 		BeforeEach(func() {
 			chunkSize = 2
-			runners = []models.Runner{{}, {}}
+			runners = []*models.Runner{{}, {}}
 
 			mockRepo.EXPECT().AddRunners(gomock.Any(), gomock.Len(chunkSize)).Return(errDeadlineExceeded)
 		})
 
-		It("", func() {
+		It("repo don't saves any runner", func() {
 			Expect(err).Should(BeNil())
 			Expect(rest).Should(BeEquivalentTo(runners))
 		})
 	})
 
-	Context("repo saves half runners", func() {
+	Context("if there is an error at the second repo call", func() {
 		BeforeEach(func() {
-			runners = []models.Runner{{}, {}}
+			runners = []*models.Runner{{}, {}}
 			chunkSize = len(runners) / 2
 
 			gomock.InOrder(
@@ -90,7 +90,7 @@ var _ = Describe("Flusher", func() {
 			)
 		})
 
-		It("", func() {
+		It("repo saves half runners", func() {
 			Expect(err).Should(BeNil())
 			Expect(rest).Should(BeEquivalentTo(runners[chunkSize:]))
 		})
