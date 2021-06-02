@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/google/uuid"
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -9,7 +10,7 @@ import (
 func TestSplitToBulks(t *testing.T) {
 	source := make([]*models.Runner, 11)
 	for i := 0; i < len(source)-1; i++ {
-		source[i] = models.NewDefault()
+		source[i] = &models.Runner{}
 	}
 
 	result := SplitToBulks(source, 2)
@@ -20,11 +21,18 @@ func TestSplitToBulks(t *testing.T) {
 }
 
 func TestGroupByGuid(t *testing.T) {
+	opSystems := []string{"windows", "linux", "macOS"}
+
 	// Good case
-	source := []*models.Runner{
-		models.NewDefault(),
-		models.NewDefault(),
-		models.NewDefault(),
+	var source []*models.Runner
+	for _, system := range opSystems {
+		guid, _ := uuid.NewUUID()
+		runner := &models.Runner{
+			Guid: guid.String(),
+			Os:   system,
+			Arch: "x64",
+		}
+		source = append(source, runner)
 	}
 
 	result, err := GroupByGuid(source)
@@ -33,10 +41,14 @@ func TestGroupByGuid(t *testing.T) {
 	assert.Len(t, result, 3)
 
 	// Bad case
-	badSource := []*models.Runner{
-		models.New("same-guid", "windows", "x64"),
-		models.New("same-guid", "linux", "x64"),
-		models.New("same-guid", "macOs", "x64"),
+	var badSource []*models.Runner
+	for _, system := range opSystems {
+		runner := &models.Runner{
+			Guid: "same-guid",
+			Os:   system,
+			Arch: "x64",
+		}
+		badSource = append(badSource, runner)
 	}
 
 	badResult, err := GroupByGuid(badSource)
