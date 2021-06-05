@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
+
+package ocp.task.api;
+
+option go_package = "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api;ocp_runner_api";
+
+service OcpRunnerApi {
+  rpc CreateRunner(Runner) returns (OperationResult);
+  rpc DescribeRunner(Runner) returns (OperationResult);
+  rpc RemoveRunner(Runner) returns (OperationResult);
+  rpc ListRunners(ListFilters) returns (RunnersList);
+}
+
+message Runner {
+  string guid = 1;
+  string os = 2;
+  string arch = 3;
+}
+
+message ListFilters {
+  repeated string guidFilter = 1;
+  repeated string osFilter = 2;
+  repeated string arcFilter = 3;
+}
+
+message RunnersList {
+  repeated Runner runners = 1;
+}
+
+message OperationResult {
+  bool success = 1;
+  string guid = 2;
+  string error = 3;
+}
+
