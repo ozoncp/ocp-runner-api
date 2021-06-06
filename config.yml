@@ -1,3 +1,6 @@
 project: "Runner API"
 version: "0.0.1"
 author: "Artem B."
+http_port: ":7000"
+grpc_port: ":7002"
+swagger_dir: "swagger"

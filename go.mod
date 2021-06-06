@@ -10,6 +10,7 @@ require (
 	github.com/onsi/ginkgo v1.16.3
 	github.com/onsi/gomega v1.13.0
 	github.com/pkg/math v0.0.0-20141027224758-f2ed9e40e245
+	github.com/rs/zerolog v1.22.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect
 	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect

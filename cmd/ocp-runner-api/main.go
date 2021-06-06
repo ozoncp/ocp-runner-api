@@ -1,16 +1,34 @@
 package main
 
 import (
-	"fmt"
+	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
+	"net"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/rs/zerolog/log"
+
+	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
+	"google.golang.org/grpc"
 )
 
 type Config struct {
-	Project string `yaml:"project"`
-	Version string `yaml:"version"`
-	Author  string `yaml:"author"`
+	Project    string `yaml:"project"`
+	Version    string `yaml:"version"`
+	Author     string `yaml:"author"`
+	HttpPort   string `yaml:"http_port"`
+	GrpcPort   string `yaml:"grpc_port"`
+	SwaggerDir string `yaml:"swagger_dir"`
+}
+
+var wg = &sync.WaitGroup{}
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
 }
 
 func main() {
@@ -19,42 +37,43 @@ func main() {
 	path, _ := filepath.Abs("./config.yml")
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Printf("failed to open config file, error: %v\n", err)
+		log.Fatal().Str("message", "failed to open config file").Err(err).Send()
 		os.Exit(1)
 	}
-	defer func(file *os.File) {
-		if closeErr := file.Close(); closeErr != nil {
-			fmt.Printf("failed to close file, error: %v\n", closeErr)
-		}
-	}(file)
-
-	openConfigLoop(path)
+	defer file.Close()
 
 	decoder := yaml.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
-		fmt.Printf("failed to parse config file, error: %v\n", err)
+		log.Fatal().Str("message", "failed to parse config file").Err(err).Send()
 		os.Exit(1)
 	}
 
-	fmt.Printf("%v by %v", config.Project, config.Author)
+	wg.Add(1)
+	go func() {
+		if err := runGrpc(config); err != nil {
+			log.Fatal().Str("message", "failed to start grpc server").Err(err).Send()
+			wg.Done()
+		}
+	}()
+	wg.Wait()
 }
 
-func openConfigLoop(path string) {
-	for i := 0; i < 5; i++ {
-		func() {
-			file, err := os.Open(path)
-			if err != nil {
-				fmt.Printf("failed to open config file, error: %v\n", err)
-				return
-			}
-			defer func(file *os.File) {
-				if closeErr := file.Close(); closeErr != nil {
-					fmt.Printf("failed to close file, error: %v\n", closeErr)
-				}
-			}(file)
-
-			fi, _ := file.Stat()
-			fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
-		}()
+// runGrpc runs gRPC server
+func runGrpc(config *Config) error {
+	listen, err := net.Listen("tcp", config.GrpcPort)
+	if err != nil {
+		log.Fatal().Err(err).Send()
+		return err
 	}
+
+	s := grpc.NewServer()
+	server.RegisterOcpRunnerApiServer(s, api.NewRunnerApi())
+	log.Info().Str("gRPC server started at", config.GrpcPort).Send()
+
+	if err := s.Serve(listen); err != nil {
+		log.Fatal().Err(err).Send()
+		return err
+	}
+
+	return nil
 }
