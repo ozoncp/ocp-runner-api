@@ -5,7 +5,6 @@ import (
 	"gopkg.in/yaml.v3"
 	"net"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -34,8 +33,7 @@ func init() {
 func main() {
 	config := &Config{}
 
-	path, _ := filepath.Abs("./config.yml")
-	file, err := os.Open(path)
+	file, err := os.Open("config.yml")
 	if err != nil {
 		log.Fatal().Str("message", "failed to open config file").Err(err).Send()
 		os.Exit(1)
