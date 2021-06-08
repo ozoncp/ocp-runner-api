@@ -33,15 +33,18 @@ type alarm struct {
 // Init runs alarm go-routine
 func (a *alarm) Init() {
 	go func() {
-		select {
-		case <-time.After(a.timeout):
-			a.alarms <- struct{}{}
-		case <-a.ctx.Done():
-			close(a.alarms)
-			a.done <- struct{}{}
-			return
+		timer := time.After(a.timeout)
+		for {
+			select {
+			case <-timer:
+				a.alarms <- struct{}{}
+				timer = time.After(a.timeout)
+			case <-a.ctx.Done():
+				close(a.alarms)
+				a.done <- struct{}{}
+				return
+			}
 		}
-
 	}()
 }
 
