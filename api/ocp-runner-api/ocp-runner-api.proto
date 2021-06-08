@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/api/annotations.proto";
 import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
 
-package ocp.task.api;
+package ocp.runner.api;
 
 option go_package = "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api;ocp_runner_api";
 
