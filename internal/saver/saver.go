@@ -2,6 +2,7 @@ package saver
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ozoncp/ocp-runner-api/internal/flusher"
 	"github.com/ozoncp/ocp-runner-api/internal/models"
@@ -40,8 +41,12 @@ func (s *saver) Init(ctx context.Context) {
 
 // Save saves the runner
 func (s *saver) Save(_ context.Context, runner *models.Runner) error {
-	s.runners <- runner
-	return nil
+	select {
+	case s.runners <- runner:
+		return nil
+	default:
+		return errors.New("save after Close() method called")
+	}
 }
 
 // flushing flushes runners by alarm signals
