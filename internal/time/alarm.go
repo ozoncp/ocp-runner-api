@@ -37,12 +37,11 @@ func (a *alarm) Init() {
 		for {
 			select {
 			case <-timer:
+
 				a.alarms <- struct{}{}
 				timer = time.After(a.timeout)
 			case <-a.ctx.Done():
-				close(a.alarms)
 				close(a.done)
-
 				return
 			}
 		}
@@ -57,4 +56,5 @@ func (a *alarm) Alarm() <-chan struct{} {
 // Close quits the alarms
 func (a *alarm) Close() {
 	<-a.done
+	close(a.alarms)
 }

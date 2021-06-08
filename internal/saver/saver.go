@@ -61,10 +61,7 @@ func (s *saver) flushing(ctx context.Context) {
 			runners = s.flusher.Flush(ctx, runners)
 		case <-ctx.Done():
 			_ = s.flusher.Flush(ctx, runners)
-
-			close(s.runners)
 			close(s.done)
-
 			return
 		}
 	}
@@ -73,4 +70,5 @@ func (s *saver) flushing(ctx context.Context) {
 // Close quits the saver
 func (s *saver) Close() {
 	<-s.done
+	close(s.runners)
 }
