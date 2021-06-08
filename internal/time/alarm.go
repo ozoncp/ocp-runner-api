@@ -40,8 +40,9 @@ func (a *alarm) Init() {
 				a.alarms <- struct{}{}
 				timer = time.After(a.timeout)
 			case <-a.ctx.Done():
+				close(a.done)
 				close(a.alarms)
-				a.done <- struct{}{}
+
 				return
 			}
 		}

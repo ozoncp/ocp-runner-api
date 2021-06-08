@@ -46,7 +46,7 @@ func (s *saver) Save(_ context.Context, runner *models.Runner) error {
 
 // flushing flushes runners by alarm signals
 func (s *saver) flushing(ctx context.Context) {
-	runners := make([]*models.Runner, s.capacity)
+	var runners []*models.Runner
 
 	alarms := s.alarm.Alarm()
 
@@ -61,7 +61,10 @@ func (s *saver) flushing(ctx context.Context) {
 			runners = s.flusher.Flush(ctx, runners)
 		case <-ctx.Done():
 			_ = s.flusher.Flush(ctx, runners)
-			s.done <- struct{}{}
+
+			close(s.done)
+			close(s.runners)
+
 			return
 		}
 	}
