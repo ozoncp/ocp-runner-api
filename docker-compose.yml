@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  runner-api:
+    build: .
+    ports:
+      - "7002:7002"

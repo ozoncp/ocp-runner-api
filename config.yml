@@ -4,3 +4,6 @@ author: "Artem B."
 http_port: ":7000"
 grpc_port: ":7002"
 swagger_dir: "swagger"
+
+# Remove old api images
+# docker rmi $(docker images "ocp-*" --format "{{.ID}}")
