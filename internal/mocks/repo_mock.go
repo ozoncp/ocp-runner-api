@@ -91,3 +91,17 @@ func (mr *MockRepoMockRecorder) RemoveRunner(arg0, arg1 interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveRunner", reflect.TypeOf((*MockRepo)(nil).RemoveRunner), arg0, arg1)
 }
+
+// UpdateRunner mocks base method.
+func (m *MockRepo) UpdateRunner(arg0 context.Context, arg1 *models.Runner) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRunner", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRunner indicates an expected call of UpdateRunner.
+func (mr *MockRepoMockRecorder) UpdateRunner(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRunner", reflect.TypeOf((*MockRepo)(nil).UpdateRunner), arg0, arg1)
+}

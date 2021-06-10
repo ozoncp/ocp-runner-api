@@ -1,60 +1,59 @@
 package main
 
 import (
-	"fmt"
-	"gopkg.in/yaml.v2"
+	"net"
 	"os"
-	"path/filepath"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
+
+	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/ozoncp/ocp-runner-api/internal/config"
+	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
 
-type Config struct {
-	Project string `yaml:"project"`
-	Version string `yaml:"version"`
-	Author  string `yaml:"author"`
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
 }
 
 func main() {
-	config := &Config{}
-
-	path, _ := filepath.Abs("./config.yml")
-	file, err := os.Open(path)
+	cfg, err := config.Read("config.yml")
 	if err != nil {
-		fmt.Printf("failed to open config file, error: %v\n", err)
-		os.Exit(1)
-	}
-	defer func(file *os.File) {
-		if closeErr := file.Close(); closeErr != nil {
-			fmt.Printf("failed to close file, error: %v\n", closeErr)
-		}
-	}(file)
-
-	openConfigLoop(path)
-
-	decoder := yaml.NewDecoder(file)
-	if err := decoder.Decode(&config); err != nil {
-		fmt.Printf("failed to parse config file, error: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("%v by %v", config.Project, config.Author)
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, os.Interrupt)
+
+	grpcServer := grpc.NewServer()
+	defer grpcServer.GracefulStop()
+
+	ec := make(chan error)
+	go runGrpc(grpcServer, cfg, ec)
+
+	select {
+	case err := <-ec:
+		log.Error().Err(err).Send()
+	case <-sc:
+		log.Info().Msg("terminating service...")
+	}
 }
 
-func openConfigLoop(path string) {
-	for i := 0; i < 5; i++ {
-		func() {
-			file, err := os.Open(path)
-			if err != nil {
-				fmt.Printf("failed to open config file, error: %v\n", err)
-				return
-			}
-			defer func(file *os.File) {
-				if closeErr := file.Close(); closeErr != nil {
-					fmt.Printf("failed to close file, error: %v\n", closeErr)
-				}
-			}(file)
+// runGrpc runs gRPC server
+func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
+	listen, err := net.Listen("tcp", config.GrpcPort)
+	if err != nil {
+		ec <- err
+	}
 
-			fi, _ := file.Stat()
-			fmt.Printf("%v. file is %d bytes long\n", i+1, fi.Size())
-		}()
+	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi())
+	log.Info().Str("gRPC server started at", config.GrpcPort).Send()
+
+	if err := grpcServer.Serve(listen); err != nil {
+		ec <- err
 	}
 }

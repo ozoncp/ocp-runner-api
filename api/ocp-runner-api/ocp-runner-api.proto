@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package ocp.runner.api;
+
+option go_package = "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api;ocp_runner_api";
+
+service OcpRunnerService {
+  rpc CreateRunner(CreateRunnerRequest)     returns (CreateRunnerResponse);
+  rpc DescribeRunner(DescribeRunnerRequest) returns (DescribeRunnerResponse);
+  rpc RemoveRunner(RemoveRunnerRequest)     returns (RemoveRunnerResponse);
+  rpc ListRunners(ListFiltersRequest)       returns (RunnersListResponse);
+}
+
+// CREATE
+message CreateRunnerRequest {
+  string os = 1;
+  string arch = 2;
+}
+
+message CreateRunnerResponse {}
+
+// DESCRIBE
+message DescribeRunnerRequest {
+  string guid = 1;
+  string os = 2;
+  string arch = 3;
+}
+
+message DescribeRunnerResponse {}
+
+// REMOVE
+message RemoveRunnerRequest {
+  string guid = 1;
+}
+
+message RemoveRunnerResponse {}
+
+// LIST
+message ListFiltersRequest {
+  repeated string guids = 1;
+  repeated string os = 2;
+  repeated string arch = 3;
+}
+
+message Runner {
+  string guid = 1;
+  string os = 2;
+  string arch = 3;
+}
+
+message RunnersListResponse {
+  repeated Runner runners = 1;
+}

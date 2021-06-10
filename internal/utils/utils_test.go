@@ -1,10 +1,12 @@
 package utils
 
 import (
-	"github.com/google/uuid"
-	"github.com/ozoncp/ocp-runner-api/internal/models"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/ozoncp/ocp-runner-api/internal/models"
 )
 
 func TestSplitToBulks(t *testing.T) {

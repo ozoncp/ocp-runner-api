@@ -2,6 +2,7 @@ package flusher
 
 import (
 	"context"
+
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	"github.com/ozoncp/ocp-runner-api/internal/utils"
