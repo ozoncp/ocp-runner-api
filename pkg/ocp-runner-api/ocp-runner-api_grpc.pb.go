@@ -14,194 +14,194 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// OcpRunnerApiClient is the client API for OcpRunnerApi service.
+// OcpRunnerServiceClient is the client API for OcpRunnerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type OcpRunnerApiClient interface {
-	CreateRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error)
-	DescribeRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error)
-	RemoveRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error)
-	ListRunners(ctx context.Context, in *ListFilters, opts ...grpc.CallOption) (*RunnersList, error)
+type OcpRunnerServiceClient interface {
+	CreateRunner(ctx context.Context, in *CreateRunnerRequest, opts ...grpc.CallOption) (*CreateRunnerResponse, error)
+	DescribeRunner(ctx context.Context, in *DescribeRunnerRequest, opts ...grpc.CallOption) (*DescribeRunnerResponse, error)
+	RemoveRunner(ctx context.Context, in *RemoveRunnerRequest, opts ...grpc.CallOption) (*RemoveRunnerResponse, error)
+	ListRunners(ctx context.Context, in *ListFiltersRequest, opts ...grpc.CallOption) (*RunnersListResponse, error)
 }
 
-type ocpRunnerApiClient struct {
+type ocpRunnerServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewOcpRunnerApiClient(cc grpc.ClientConnInterface) OcpRunnerApiClient {
-	return &ocpRunnerApiClient{cc}
+func NewOcpRunnerServiceClient(cc grpc.ClientConnInterface) OcpRunnerServiceClient {
+	return &ocpRunnerServiceClient{cc}
 }
 
-func (c *ocpRunnerApiClient) CreateRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error) {
-	out := new(OperationResult)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpRunnerApi/CreateRunner", in, out, opts...)
+func (c *ocpRunnerServiceClient) CreateRunner(ctx context.Context, in *CreateRunnerRequest, opts ...grpc.CallOption) (*CreateRunnerResponse, error) {
+	out := new(CreateRunnerResponse)
+	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/CreateRunner", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ocpRunnerApiClient) DescribeRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error) {
-	out := new(OperationResult)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpRunnerApi/DescribeRunner", in, out, opts...)
+func (c *ocpRunnerServiceClient) DescribeRunner(ctx context.Context, in *DescribeRunnerRequest, opts ...grpc.CallOption) (*DescribeRunnerResponse, error) {
+	out := new(DescribeRunnerResponse)
+	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/DescribeRunner", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ocpRunnerApiClient) RemoveRunner(ctx context.Context, in *Runner, opts ...grpc.CallOption) (*OperationResult, error) {
-	out := new(OperationResult)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpRunnerApi/RemoveRunner", in, out, opts...)
+func (c *ocpRunnerServiceClient) RemoveRunner(ctx context.Context, in *RemoveRunnerRequest, opts ...grpc.CallOption) (*RemoveRunnerResponse, error) {
+	out := new(RemoveRunnerResponse)
+	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/RemoveRunner", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ocpRunnerApiClient) ListRunners(ctx context.Context, in *ListFilters, opts ...grpc.CallOption) (*RunnersList, error) {
-	out := new(RunnersList)
-	err := c.cc.Invoke(ctx, "/ocp.task.api.OcpRunnerApi/ListRunners", in, out, opts...)
+func (c *ocpRunnerServiceClient) ListRunners(ctx context.Context, in *ListFiltersRequest, opts ...grpc.CallOption) (*RunnersListResponse, error) {
+	out := new(RunnersListResponse)
+	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/ListRunners", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// OcpRunnerApiServer is the server API for OcpRunnerApi service.
-// All implementations must embed UnimplementedOcpRunnerApiServer
+// OcpRunnerServiceServer is the server API for OcpRunnerService service.
+// All implementations must embed UnimplementedOcpRunnerServiceServer
 // for forward compatibility
-type OcpRunnerApiServer interface {
-	CreateRunner(context.Context, *Runner) (*OperationResult, error)
-	DescribeRunner(context.Context, *Runner) (*OperationResult, error)
-	RemoveRunner(context.Context, *Runner) (*OperationResult, error)
-	ListRunners(context.Context, *ListFilters) (*RunnersList, error)
-	mustEmbedUnimplementedOcpRunnerApiServer()
+type OcpRunnerServiceServer interface {
+	CreateRunner(context.Context, *CreateRunnerRequest) (*CreateRunnerResponse, error)
+	DescribeRunner(context.Context, *DescribeRunnerRequest) (*DescribeRunnerResponse, error)
+	RemoveRunner(context.Context, *RemoveRunnerRequest) (*RemoveRunnerResponse, error)
+	ListRunners(context.Context, *ListFiltersRequest) (*RunnersListResponse, error)
+	mustEmbedUnimplementedOcpRunnerServiceServer()
 }
 
-// UnimplementedOcpRunnerApiServer must be embedded to have forward compatible implementations.
-type UnimplementedOcpRunnerApiServer struct {
+// UnimplementedOcpRunnerServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedOcpRunnerServiceServer struct {
 }
 
-func (UnimplementedOcpRunnerApiServer) CreateRunner(context.Context, *Runner) (*OperationResult, error) {
+func (UnimplementedOcpRunnerServiceServer) CreateRunner(context.Context, *CreateRunnerRequest) (*CreateRunnerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRunner not implemented")
 }
-func (UnimplementedOcpRunnerApiServer) DescribeRunner(context.Context, *Runner) (*OperationResult, error) {
+func (UnimplementedOcpRunnerServiceServer) DescribeRunner(context.Context, *DescribeRunnerRequest) (*DescribeRunnerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeRunner not implemented")
 }
-func (UnimplementedOcpRunnerApiServer) RemoveRunner(context.Context, *Runner) (*OperationResult, error) {
+func (UnimplementedOcpRunnerServiceServer) RemoveRunner(context.Context, *RemoveRunnerRequest) (*RemoveRunnerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRunner not implemented")
 }
-func (UnimplementedOcpRunnerApiServer) ListRunners(context.Context, *ListFilters) (*RunnersList, error) {
+func (UnimplementedOcpRunnerServiceServer) ListRunners(context.Context, *ListFiltersRequest) (*RunnersListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRunners not implemented")
 }
-func (UnimplementedOcpRunnerApiServer) mustEmbedUnimplementedOcpRunnerApiServer() {}
+func (UnimplementedOcpRunnerServiceServer) mustEmbedUnimplementedOcpRunnerServiceServer() {}
 
-// UnsafeOcpRunnerApiServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to OcpRunnerApiServer will
+// UnsafeOcpRunnerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to OcpRunnerServiceServer will
 // result in compilation errors.
-type UnsafeOcpRunnerApiServer interface {
-	mustEmbedUnimplementedOcpRunnerApiServer()
+type UnsafeOcpRunnerServiceServer interface {
+	mustEmbedUnimplementedOcpRunnerServiceServer()
 }
 
-func RegisterOcpRunnerApiServer(s grpc.ServiceRegistrar, srv OcpRunnerApiServer) {
-	s.RegisterService(&OcpRunnerApi_ServiceDesc, srv)
+func RegisterOcpRunnerServiceServer(s grpc.ServiceRegistrar, srv OcpRunnerServiceServer) {
+	s.RegisterService(&OcpRunnerService_ServiceDesc, srv)
 }
 
-func _OcpRunnerApi_CreateRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Runner)
+func _OcpRunnerService_CreateRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRunnerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OcpRunnerApiServer).CreateRunner(ctx, in)
+		return srv.(OcpRunnerServiceServer).CreateRunner(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpRunnerApi/CreateRunner",
+		FullMethod: "/ocp.runner.api.OcpRunnerService/CreateRunner",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OcpRunnerApiServer).CreateRunner(ctx, req.(*Runner))
+		return srv.(OcpRunnerServiceServer).CreateRunner(ctx, req.(*CreateRunnerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OcpRunnerApi_DescribeRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Runner)
+func _OcpRunnerService_DescribeRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeRunnerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OcpRunnerApiServer).DescribeRunner(ctx, in)
+		return srv.(OcpRunnerServiceServer).DescribeRunner(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpRunnerApi/DescribeRunner",
+		FullMethod: "/ocp.runner.api.OcpRunnerService/DescribeRunner",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OcpRunnerApiServer).DescribeRunner(ctx, req.(*Runner))
+		return srv.(OcpRunnerServiceServer).DescribeRunner(ctx, req.(*DescribeRunnerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OcpRunnerApi_RemoveRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Runner)
+func _OcpRunnerService_RemoveRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveRunnerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OcpRunnerApiServer).RemoveRunner(ctx, in)
+		return srv.(OcpRunnerServiceServer).RemoveRunner(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpRunnerApi/RemoveRunner",
+		FullMethod: "/ocp.runner.api.OcpRunnerService/RemoveRunner",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OcpRunnerApiServer).RemoveRunner(ctx, req.(*Runner))
+		return srv.(OcpRunnerServiceServer).RemoveRunner(ctx, req.(*RemoveRunnerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OcpRunnerApi_ListRunners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListFilters)
+func _OcpRunnerService_ListRunners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFiltersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OcpRunnerApiServer).ListRunners(ctx, in)
+		return srv.(OcpRunnerServiceServer).ListRunners(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ocp.task.api.OcpRunnerApi/ListRunners",
+		FullMethod: "/ocp.runner.api.OcpRunnerService/ListRunners",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OcpRunnerApiServer).ListRunners(ctx, req.(*ListFilters))
+		return srv.(OcpRunnerServiceServer).ListRunners(ctx, req.(*ListFiltersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// OcpRunnerApi_ServiceDesc is the grpc.ServiceDesc for OcpRunnerApi service.
+// OcpRunnerService_ServiceDesc is the grpc.ServiceDesc for OcpRunnerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var OcpRunnerApi_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ocp.task.api.OcpRunnerApi",
-	HandlerType: (*OcpRunnerApiServer)(nil),
+var OcpRunnerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ocp.runner.api.OcpRunnerService",
+	HandlerType: (*OcpRunnerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateRunner",
-			Handler:    _OcpRunnerApi_CreateRunner_Handler,
+			Handler:    _OcpRunnerService_CreateRunner_Handler,
 		},
 		{
 			MethodName: "DescribeRunner",
-			Handler:    _OcpRunnerApi_DescribeRunner_Handler,
+			Handler:    _OcpRunnerService_DescribeRunner_Handler,
 		},
 		{
 			MethodName: "RemoveRunner",
-			Handler:    _OcpRunnerApi_RemoveRunner_Handler,
+			Handler:    _OcpRunnerService_RemoveRunner_Handler,
 		},
 		{
 			MethodName: "ListRunners",
-			Handler:    _OcpRunnerApi_ListRunners_Handler,
+			Handler:    _OcpRunnerService_ListRunners_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

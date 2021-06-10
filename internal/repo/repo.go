@@ -2,8 +2,10 @@ package repo
 
 import (
 	"context"
-	"github.com/ozoncp/ocp-runner-api/internal/models"
+
 	"github.com/rs/zerolog/log"
+
+	"github.com/ozoncp/ocp-runner-api/internal/models"
 )
 
 type Repo interface {

@@ -3,8 +3,10 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/ozoncp/ocp-runner-api/internal/models"
+
 	"github.com/pkg/math"
+
+	"github.com/ozoncp/ocp-runner-api/internal/models"
 )
 
 // SplitToBulks split the source slice into the slice of slices

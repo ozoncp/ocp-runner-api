@@ -5,6 +5,7 @@ PHONY: .generate
 .generate:
 		mkdir -p swagger
 		mkdir -p pkg/ocp-runner-api
+		cp api/ocp-runner-api/ocp-runner-api.proto vendor.protogen/api/ocp-runner-api
 		protoc -I vendor.protogen \
 				--go_out=pkg/ocp-runner-api --go_opt=paths=import \
 				--go-grpc_out=pkg/ocp-runner-api --go-grpc_opt=paths=import \
@@ -20,7 +21,7 @@ PHONY: .generate
 
 PHONY: .build
 .build:
-		CGO_ENABLED=0 GOOS=linux go build -o bin/ocp-runner-api cmd/ocp-runner-api/main.go
+		go build -o bin/ocp-runner-api cmd/ocp-runner-api/main.go
 
 PHONY: install
 install: build .install
@@ -36,7 +37,6 @@ PHONY: .vendor-proto
 .vendor-proto:
 		mkdir -p vendor.protogen
 		mkdir -p vendor.protogen/api/ocp-runner-api
-		cp api/ocp-runner-api/ocp-runner-api.proto vendor.protogen/api/ocp-runner-api
 		@if [ ! -d vendor.protogen/google ]; then \
 			git clone https://github.com/googleapis/googleapis vendor.protogen/googleapis &&\
 			mkdir -p  vendor.protogen/google/ &&\
