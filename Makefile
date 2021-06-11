@@ -21,7 +21,7 @@ PHONY: .generate
 
 PHONY: .build
 .build:
-		go build -o bin/ocp-runner-api cmd/ocp-runner-api/main.go
+		CGO_ENABLED=0 GOOS=linux go build -o bin/ocp-runner-api cmd/ocp-runner-api/main.go
 
 PHONY: install
 install: build .install
