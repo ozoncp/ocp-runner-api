@@ -256,7 +256,7 @@ var _ = Describe("Api", func() {
 			response, err = service.ListRunners(ctx, request)
 		})
 
-		It("should be listed all runners", func() {
+		It("should be listed single runner", func() {
 			Expect(response).ShouldNot(BeNil())
 			Expect(len(response.Runners)).Should(BeEquivalentTo(1))
 			Expect(err).Should(BeNil())
