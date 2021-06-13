@@ -1,0 +1,265 @@
+package api_test
+
+import (
+	"context"
+
+	"github.com/golang/mock/gomock"
+	"github.com/jmoiron/sqlx"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	sqlxmock "github.com/zhashkevych/go-sqlxmock"
+
+	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/ozoncp/ocp-runner-api/internal/repo"
+	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
+)
+
+var _ = Describe("Api", func() {
+	var (
+		err error
+
+		ctrl *gomock.Controller
+		ctx  context.Context
+
+		db     *sqlx.DB
+		dbMock sqlxmock.Sqlmock
+
+		r       repo.Repo
+		service server.OcpRunnerServiceServer
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		ctrl = gomock.NewController(GinkgoT())
+
+		db, dbMock, err = sqlxmock.Newx()
+		r = repo.New(db)
+		service = api.NewRunnerApi(r)
+	})
+
+	AfterEach(func() {
+		ctrl.Finish()
+		db.Close()
+	})
+
+	Context("if create method called", func() {
+		var (
+			request  *server.CreateRunnerRequest
+			response *server.CreateRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.CreateRunnerRequest{
+				Os:   "some_os",
+				Arch: "some_arch",
+			}
+
+			dbMock.
+				ExpectExec("INSERT INTO runners").
+				WithArgs(sqlxmock.AnyArg(), request.Os, request.Arch).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.CreateRunner(ctx, request)
+		})
+
+		It("should be added a new runner", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if describe method called", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.DescribeRunnerRequest{
+				Guid: "not_empty",
+				Os:   "new_val",
+				Arch: "new_val",
+			}
+
+			dbMock.
+				ExpectExec("UPDATE runners").
+				WithArgs(request.Os, request.Arch, request.Guid).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be updated existing runner", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if describe method called with one field", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.DescribeRunnerRequest{
+				Guid: "not_empty",
+				Os:   "new_val",
+			}
+
+			dbMock.
+				ExpectExec("UPDATE runners").
+				WithArgs(request.Os, request.Guid).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be updated existing runner", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if describe method called without guid", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.DescribeRunnerRequest{}
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be error", func() {
+			Expect(response).Should(BeNil())
+			Expect(err).ShouldNot(BeNil())
+		})
+	})
+
+	Context("if describe method called without any new fields", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.DescribeRunnerRequest{Guid: "some_guid"}
+
+			dbMock.
+				ExpectExec("UPDATE runners").
+				WithArgs(request.Guid, request.Os, request.Arch).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be error", func() {
+			Expect(response).Should(BeNil())
+			Expect(err).ShouldNot(BeNil())
+		})
+	})
+
+	Context("if remove method called with guid", func() {
+		var (
+			request  *server.RemoveRunnerRequest
+			response *server.RemoveRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.RemoveRunnerRequest{Guid: "some_guid"}
+
+			dbMock.
+				ExpectExec("DELETE FROM runners").
+				WithArgs(request.Guid).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.RemoveRunner(ctx, request)
+		})
+
+		It("should be removed runner", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if remove method called without guid", func() {
+		var (
+			request  *server.RemoveRunnerRequest
+			response *server.RemoveRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.RemoveRunnerRequest{}
+
+			dbMock.
+				ExpectExec("DELETE FROM runners").
+				WithArgs(request.Guid).
+				WillReturnResult(sqlxmock.NewResult(0, 1))
+
+			response, err = service.RemoveRunner(ctx, request)
+		})
+
+		It("should be error", func() {
+			Expect(response).Should(BeNil())
+			Expect(err).ShouldNot(BeNil())
+		})
+	})
+
+	Context("if list method called without filters", func() {
+		var (
+			request  *server.ListFiltersRequest
+			response *server.RunnersListResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.ListFiltersRequest{}
+
+			rows := sqlxmock.
+				NewRows([]string{"guid", "os", "arch"}).
+				AddRow("some_guid_1", "windows", "x64").
+				AddRow("some_guid_2", "linux", "x64").
+				AddRow("some_guid_3", "macOS", "x64")
+			dbMock.
+				ExpectQuery("^SELECT (.+) FROM runners").
+				WillReturnRows(rows)
+
+			response, err = service.ListRunners(ctx, request)
+		})
+
+		It("should be listed all runners", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(len(response.Runners)).Should(BeEquivalentTo(3))
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if list method called with guid filter", func() {
+		var (
+			request  *server.ListFiltersRequest
+			response *server.RunnersListResponse
+		)
+
+		BeforeEach(func() {
+			const guid string = "some_guid"
+			request = &server.ListFiltersRequest{Guids: []string{guid}}
+
+			rows := sqlxmock.
+				NewRows([]string{"guid", "os", "arch"}).
+				AddRow(guid, "windows", "x64")
+			dbMock.
+				ExpectQuery("^SELECT (.+) FROM runners").
+				WithArgs(guid).
+				WillReturnRows(rows)
+
+			response, err = service.ListRunners(ctx, request)
+		})
+
+		It("should be listed all runners", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(len(response.Runners)).Should(BeEquivalentTo(1))
+			Expect(err).Should(BeNil())
+		})
+	})
+})

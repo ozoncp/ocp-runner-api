@@ -7,12 +7,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
 	"github.com/ozoncp/ocp-runner-api/internal/api"
 	"github.com/ozoncp/ocp-runner-api/internal/config"
+	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
 
@@ -48,12 +51,39 @@ func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
 	listen, err := net.Listen("tcp", config.GrpcPort)
 	if err != nil {
 		ec <- err
+		return
 	}
 
-	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi())
+	db, err := connectDatabase(config)
+	if err != nil {
+		ec <- err
+		return
+	}
+	defer db.Close()
+
+	repository := repo.New(db)
+	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository))
 	log.Info().Str("gRPC server started at", config.GrpcPort).Send()
 
 	if err := grpcServer.Serve(listen); err != nil {
 		ec <- err
 	}
+}
+
+// connectDatabase initializes DB connection
+func connectDatabase(config *config.Config) (*sqlx.DB, error) {
+	log.Info().Msg("db: connecting...")
+
+	db, err := sqlx.Connect("postgres", config.Database)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info().Msg("db: successfully connected")
+	return db, nil
 }

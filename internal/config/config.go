@@ -14,6 +14,7 @@ type Config struct {
 	HttpPort   string `yaml:"http_port"`
 	GrpcPort   string `yaml:"grpc_port"`
 	SwaggerDir string `yaml:"swagger_dir"`
+	Database   string `yaml:"database"`
 }
 
 // Read reads config from file
