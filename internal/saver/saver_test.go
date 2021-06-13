@@ -26,9 +26,7 @@ var _ = Describe("Saver", func() {
 		mockFlusher *mocks.MockFlusher
 		mockAlarm   *mocks.MockAlarm
 
-		runner *models.Runner
 		s      saver.Saver
-
 		alarms chan struct{}
 	)
 
@@ -47,7 +45,7 @@ var _ = Describe("Saver", func() {
 
 	JustBeforeEach(func() {
 		s.Init(ctx)
-		err = s.Save(ctx, runner)
+		err = s.Save(ctx, &models.Runner{})
 	})
 
 	AfterEach(func() {
@@ -69,7 +67,7 @@ var _ = Describe("Saver", func() {
 			cancelFunc()
 		})
 
-		It("flusher returns no errors", func() {
+		It("flusher returns errors", func() {
 			Expect(err).Should(BeNil())
 		})
 	})

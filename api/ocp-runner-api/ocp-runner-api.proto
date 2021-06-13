@@ -5,10 +5,11 @@ package ocp.runner.api;
 option go_package = "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api;ocp_runner_api";
 
 service OcpRunnerService {
-  rpc CreateRunner(CreateRunnerRequest)     returns (CreateRunnerResponse);
-  rpc DescribeRunner(DescribeRunnerRequest) returns (DescribeRunnerResponse);
-  rpc RemoveRunner(RemoveRunnerRequest)     returns (RemoveRunnerResponse);
-  rpc ListRunners(ListFiltersRequest)       returns (RunnersListResponse);
+  rpc CreateRunner(CreateRunnerRequest)            returns (CreateRunnerResponse);
+  rpc MultiCreateRunner(MultiCreateRunnerRequest)  returns (MultiCreateRunnerResponse);
+  rpc UpdateRunner(UpdateRunnerRequest)            returns (UpdateRunnerResponse);
+  rpc RemoveRunner(RemoveRunnerRequest)            returns (RemoveRunnerResponse);
+  rpc ListRunners(ListFiltersRequest)              returns (RunnersListResponse);
 }
 
 // CREATE
@@ -19,14 +20,22 @@ message CreateRunnerRequest {
 
 message CreateRunnerResponse {}
 
-// DESCRIBE
-message DescribeRunnerRequest {
+// MULTI CREATE
+message MultiCreateRunnerRequest {
+  repeated CreateRunnerRequest runners = 1;
+  int32 batchSize = 2;
+}
+
+message MultiCreateRunnerResponse {}
+
+// UPDATE
+message UpdateRunnerRequest {
   string guid = 1;
   string os = 2;
   string arch = 3;
 }
 
-message DescribeRunnerResponse {}
+message UpdateRunnerResponse {}
 
 // REMOVE
 message RemoveRunnerRequest {

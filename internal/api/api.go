@@ -10,6 +10,7 @@ import (
 
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
+	"github.com/ozoncp/ocp-runner-api/internal/utils"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
 
@@ -46,8 +47,30 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 	return &server.CreateRunnerResponse{}, nil
 }
 
-// DescribeRunner updates runner
-func (a *api) DescribeRunner(ctx context.Context, request *server.DescribeRunnerRequest) (*server.DescribeRunnerResponse, error) {
+// MultiCreateRunner create new runners
+func (a *api) MultiCreateRunner(ctx context.Context, request *server.MultiCreateRunnerRequest) (*server.MultiCreateRunnerResponse, error) {
+	var runners []*models.Runner
+	for _, r := range request.Runners {
+		guid, _ := uuid.NewUUID()
+		runners = append(runners, &models.Runner{
+			Guid: guid.String(),
+			Os:   r.Os,
+			Arch: r.Arch,
+		})
+	}
+
+	runnersBulk := utils.SplitToBulks(runners, int(request.BatchSize))
+	for _, bulk := range runnersBulk {
+		if err := a.repo.AddRunners(ctx, bulk); err != nil {
+			return nil, status.Error(codes.Internal, "failed to add new runners")
+		}
+	}
+
+	return &server.MultiCreateRunnerResponse{}, nil
+}
+
+// UpdateRunner updates runner
+func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequest) (*server.UpdateRunnerResponse, error) {
 	log.Info().Str("action", "update runner").Send()
 
 	if len(request.Guid) == 0 {
@@ -64,7 +87,7 @@ func (a *api) DescribeRunner(ctx context.Context, request *server.DescribeRunner
 		return nil, status.Error(codes.Internal, "failed to update runner")
 	}
 
-	return &server.DescribeRunnerResponse{}, nil
+	return &server.UpdateRunnerResponse{}, nil
 }
 
 // RemoveRunner removes runner

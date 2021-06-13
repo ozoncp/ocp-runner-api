@@ -171,10 +171,161 @@ var _ interface {
 	ErrorName() string
 } = CreateRunnerResponseValidationError{}
 
-// Validate checks the field values on DescribeRunnerRequest with the rules
+// Validate checks the field values on MultiCreateRunnerRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *DescribeRunnerRequest) Validate() error {
+func (m *MultiCreateRunnerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetRunners() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MultiCreateRunnerRequestValidationError{
+					field:  fmt.Sprintf("Runners[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for BatchSize
+
+	return nil
+}
+
+// MultiCreateRunnerRequestValidationError is the validation error returned by
+// MultiCreateRunnerRequest.Validate if the designated constraints aren't met.
+type MultiCreateRunnerRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreateRunnerRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreateRunnerRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreateRunnerRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreateRunnerRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreateRunnerRequestValidationError) ErrorName() string {
+	return "MultiCreateRunnerRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreateRunnerRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreateRunnerRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreateRunnerRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreateRunnerRequestValidationError{}
+
+// Validate checks the field values on MultiCreateRunnerResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MultiCreateRunnerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	return nil
+}
+
+// MultiCreateRunnerResponseValidationError is the validation error returned by
+// MultiCreateRunnerResponse.Validate if the designated constraints aren't met.
+type MultiCreateRunnerResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MultiCreateRunnerResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MultiCreateRunnerResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MultiCreateRunnerResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MultiCreateRunnerResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MultiCreateRunnerResponseValidationError) ErrorName() string {
+	return "MultiCreateRunnerResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MultiCreateRunnerResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMultiCreateRunnerResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MultiCreateRunnerResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MultiCreateRunnerResponseValidationError{}
+
+// Validate checks the field values on UpdateRunnerRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *UpdateRunnerRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -188,9 +339,9 @@ func (m *DescribeRunnerRequest) Validate() error {
 	return nil
 }
 
-// DescribeRunnerRequestValidationError is the validation error returned by
-// DescribeRunnerRequest.Validate if the designated constraints aren't met.
-type DescribeRunnerRequestValidationError struct {
+// UpdateRunnerRequestValidationError is the validation error returned by
+// UpdateRunnerRequest.Validate if the designated constraints aren't met.
+type UpdateRunnerRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -198,24 +349,24 @@ type DescribeRunnerRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e DescribeRunnerRequestValidationError) Field() string { return e.field }
+func (e UpdateRunnerRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DescribeRunnerRequestValidationError) Reason() string { return e.reason }
+func (e UpdateRunnerRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DescribeRunnerRequestValidationError) Cause() error { return e.cause }
+func (e UpdateRunnerRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DescribeRunnerRequestValidationError) Key() bool { return e.key }
+func (e UpdateRunnerRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DescribeRunnerRequestValidationError) ErrorName() string {
-	return "DescribeRunnerRequestValidationError"
+func (e UpdateRunnerRequestValidationError) ErrorName() string {
+	return "UpdateRunnerRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e DescribeRunnerRequestValidationError) Error() string {
+func (e UpdateRunnerRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -227,14 +378,14 @@ func (e DescribeRunnerRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sDescribeRunnerRequest.%s: %s%s",
+		"invalid %sUpdateRunnerRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DescribeRunnerRequestValidationError{}
+var _ error = UpdateRunnerRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -242,12 +393,12 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DescribeRunnerRequestValidationError{}
+} = UpdateRunnerRequestValidationError{}
 
-// Validate checks the field values on DescribeRunnerResponse with the rules
+// Validate checks the field values on UpdateRunnerResponse with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, an error is returned.
-func (m *DescribeRunnerResponse) Validate() error {
+func (m *UpdateRunnerResponse) Validate() error {
 	if m == nil {
 		return nil
 	}
@@ -255,9 +406,9 @@ func (m *DescribeRunnerResponse) Validate() error {
 	return nil
 }
 
-// DescribeRunnerResponseValidationError is the validation error returned by
-// DescribeRunnerResponse.Validate if the designated constraints aren't met.
-type DescribeRunnerResponseValidationError struct {
+// UpdateRunnerResponseValidationError is the validation error returned by
+// UpdateRunnerResponse.Validate if the designated constraints aren't met.
+type UpdateRunnerResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -265,24 +416,24 @@ type DescribeRunnerResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e DescribeRunnerResponseValidationError) Field() string { return e.field }
+func (e UpdateRunnerResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e DescribeRunnerResponseValidationError) Reason() string { return e.reason }
+func (e UpdateRunnerResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e DescribeRunnerResponseValidationError) Cause() error { return e.cause }
+func (e UpdateRunnerResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e DescribeRunnerResponseValidationError) Key() bool { return e.key }
+func (e UpdateRunnerResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e DescribeRunnerResponseValidationError) ErrorName() string {
-	return "DescribeRunnerResponseValidationError"
+func (e UpdateRunnerResponseValidationError) ErrorName() string {
+	return "UpdateRunnerResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e DescribeRunnerResponseValidationError) Error() string {
+func (e UpdateRunnerResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -294,14 +445,14 @@ func (e DescribeRunnerResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sDescribeRunnerResponse.%s: %s%s",
+		"invalid %sUpdateRunnerResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = DescribeRunnerResponseValidationError{}
+var _ error = UpdateRunnerResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -309,7 +460,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = DescribeRunnerResponseValidationError{}
+} = UpdateRunnerResponseValidationError{}
 
 // Validate checks the field values on RemoveRunnerRequest with the rules
 // defined in the proto definition for this message. If any rules are

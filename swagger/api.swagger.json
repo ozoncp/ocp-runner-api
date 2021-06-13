@@ -12,10 +12,22 @@
   ],
   "paths": {},
   "definitions": {
+    "apiCreateRunnerRequest": {
+      "type": "object",
+      "properties": {
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        }
+      },
+      "title": "CREATE"
+    },
     "apiCreateRunnerResponse": {
       "type": "object"
     },
-    "apiDescribeRunnerResponse": {
+    "apiMultiCreateRunnerResponse": {
       "type": "object"
     },
     "apiRemoveRunnerResponse": {
@@ -45,6 +57,9 @@
           }
         }
       }
+    },
+    "apiUpdateRunnerResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",
