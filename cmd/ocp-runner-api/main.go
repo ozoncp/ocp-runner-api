@@ -24,7 +24,7 @@ func init() {
 }
 
 func main() {
-	cfg, err := config.Read("./config.yml")
+	cfg, err := config.Read("config.yml")
 	if err != nil {
 		os.Exit(1)
 	}
