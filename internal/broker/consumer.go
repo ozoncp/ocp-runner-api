@@ -6,6 +6,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/rs/zerolog/log"
 
+	"github.com/ozoncp/ocp-runner-api/internal/metrics"
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 )
 
@@ -66,6 +67,7 @@ func (c *consumer) Close() {
 // handleMessage processes message from topic
 func (c *consumer) handleMessage(message *sarama.ConsumerMessage) {
 	log.Info().Msgf("received message: %v", string(message.Value))
+	metrics.IncConsumedMessages()
 
 	var runnerEvent models.RunnerEvent
 	if err := json.Unmarshal(message.Value, &runnerEvent); err != nil {

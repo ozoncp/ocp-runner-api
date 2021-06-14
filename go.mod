@@ -12,6 +12,7 @@ require (
 	github.com/onsi/ginkgo v1.16.3
 	github.com/onsi/gomega v1.13.0
 	github.com/pkg/math v0.0.0-20141027224758-f2ed9e40e245
+	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.22.0
 	github.com/stretchr/testify v1.7.0
 	github.com/zhashkevych/go-sqlxmock v1.5.2-0.20201023121933-f973d0041cfc

@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
@@ -16,6 +18,7 @@ import (
 	"github.com/ozoncp/ocp-runner-api/internal/api"
 	"github.com/ozoncp/ocp-runner-api/internal/broker"
 	"github.com/ozoncp/ocp-runner-api/internal/config"
+	"github.com/ozoncp/ocp-runner-api/internal/metrics"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
@@ -37,6 +40,7 @@ func main() {
 	defer grpcServer.GracefulStop()
 
 	ec := make(chan error)
+	go runMetrics(cfg, ec)
 	go runGrpc(grpcServer, cfg, ec)
 
 	select {
@@ -112,4 +116,14 @@ func initBrokers(config *config.Config) (broker.Producer, broker.Consumer, error
 	}
 
 	return prod, cons, nil
+}
+
+// runMetrics runs prometheus
+func runMetrics(config *config.Config, ec chan<- error) {
+	metrics.RegisterMetrics()
+
+	http.Handle(config.MetricsHandle, promhttp.Handler())
+	if err := http.ListenAndServe(config.MetricsPort, nil); err != nil {
+		ec <- err
+	}
 }
