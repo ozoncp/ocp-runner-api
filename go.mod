@@ -4,10 +4,10 @@ go 1.16
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
+	github.com/Shopify/sarama v1.29.0 // indirect
 	github.com/golang/mock v1.5.0
 	github.com/google/uuid v1.2.0
 	github.com/jmoiron/sqlx v1.3.4
-	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/onsi/ginkgo v1.16.3
 	github.com/onsi/gomega v1.13.0
@@ -20,7 +20,6 @@ require (
 	google.golang.org/genproto v0.0.0-20210604141403-392c879c8b08 // indirect
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.0
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
