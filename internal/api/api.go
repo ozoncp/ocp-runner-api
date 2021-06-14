@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/ozoncp/ocp-runner-api/internal/models"
+	"github.com/ozoncp/ocp-runner-api/internal/producer"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	"github.com/ozoncp/ocp-runner-api/internal/utils"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
@@ -18,11 +19,15 @@ import (
 type api struct {
 	server.UnimplementedOcpRunnerServiceServer
 	repo repo.Repo
+	prod producer.Producer
 }
 
 // NewRunnerApi constructor
-func NewRunnerApi(repo repo.Repo) server.OcpRunnerServiceServer {
-	return &api{repo: repo}
+func NewRunnerApi(repo repo.Repo, prod producer.Producer) server.OcpRunnerServiceServer {
+	return &api{
+		repo: repo,
+		prod: prod,
+	}
 }
 
 // CreateRunner creates new runner
@@ -42,6 +47,11 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 
 	if err := a.repo.AddRunner(ctx, &runner); err != nil {
 		return nil, status.Error(codes.Internal, "failed to add new runner")
+	}
+
+	payload := map[string]interface{}{"guid": runner.Guid, "os": runner.Os, "arch": runner.Arch}
+	if err := a.publishEvent("runners", models.Created, payload); err != nil {
+		return nil, status.Error(codes.Internal, "failed to publish created event")
 	}
 
 	return &server.CreateRunnerResponse{}, nil
@@ -87,6 +97,11 @@ func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequ
 		return nil, status.Error(codes.Internal, "failed to update runner")
 	}
 
+	payload := map[string]interface{}{"guid": runner.Guid, "new_os": runner.Os, "new_arch": runner.Arch}
+	if err := a.publishEvent("runners", models.Updated, payload); err != nil {
+		return nil, status.Error(codes.Internal, "failed to publish updated event")
+	}
+
 	return &server.UpdateRunnerResponse{}, nil
 }
 
@@ -100,6 +115,11 @@ func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequ
 
 	if err := a.repo.RemoveRunner(ctx, request.Guid); err != nil {
 		return nil, status.Error(codes.Internal, "failed to remove runner")
+	}
+
+	payload := map[string]interface{}{"guid": request.Guid}
+	if err := a.publishEvent("runners", models.Removed, payload); err != nil {
+		return nil, status.Error(codes.Internal, "failed to publish removed event")
 	}
 
 	return &server.RemoveRunnerResponse{}, nil
@@ -124,4 +144,8 @@ func (a *api) ListRunners(ctx context.Context, request *server.ListFiltersReques
 	}
 
 	return &server.RunnersListResponse{Runners: grpcRunners}, nil
+}
+
+func (a *api) publishEvent(topic string, eventType models.RunnerEventType, payload map[string]interface{}) error {
+	return a.prod.SendMessage(topic, &models.RunnerEvent{Type: eventType, Body: payload})
 }

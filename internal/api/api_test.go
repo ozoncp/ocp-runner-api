@@ -10,6 +10,7 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/ozoncp/ocp-runner-api/internal/mocks"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
@@ -21,8 +22,9 @@ var _ = Describe("Api", func() {
 		ctrl *gomock.Controller
 		ctx  context.Context
 
-		db     *sqlx.DB
-		dbMock sqlxmock.Sqlmock
+		db       *sqlx.DB
+		dbMock   sqlxmock.Sqlmock
+		prodMock *mocks.MockProducer
 
 		r       repo.Repo
 		service server.OcpRunnerServiceServer
@@ -34,7 +36,11 @@ var _ = Describe("Api", func() {
 
 		db, dbMock, err = sqlxmock.Newx()
 		r = repo.New(db)
-		service = api.NewRunnerApi(r)
+
+		prodMock = mocks.NewMockProducer(ctrl)
+		prodMock.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+		service = api.NewRunnerApi(r, prodMock)
 	})
 
 	AfterEach(func() {

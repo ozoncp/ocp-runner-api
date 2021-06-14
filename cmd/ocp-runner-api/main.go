@@ -15,6 +15,7 @@ import (
 
 	"github.com/ozoncp/ocp-runner-api/internal/api"
 	"github.com/ozoncp/ocp-runner-api/internal/config"
+	"github.com/ozoncp/ocp-runner-api/internal/producer"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
@@ -61,8 +62,15 @@ func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
 	}
 	defer db.Close()
 
+	prod := producer.New()
+	if err := prod.Init(config.KafkaBrokers); err != nil {
+		ec <- err
+		return
+	}
+	defer prod.Close()
+
 	repository := repo.New(db)
-	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository))
+	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository, prod))
 	log.Info().Str("gRPC server started at", config.GrpcPort).Send()
 
 	if err := grpcServer.Serve(listen); err != nil {
