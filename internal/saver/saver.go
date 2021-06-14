@@ -18,25 +18,28 @@ type Saver interface {
 // NewSaver constructor
 func NewSaver(capacity int, alarm time.Alarm, flusher flusher.Flusher) Saver {
 	return &saver{
-		capacity: capacity,
-		runners:  make(chan *models.Runner),
-		done:     make(chan struct{}),
-		alarm:    alarm,
-		flusher:  flusher,
+		capacity:       capacity,
+		runners:        make(chan *models.Runner),
+		done:           make(chan struct{}),
+		alarm:          alarm,
+		flusher:        flusher,
+		flusherStarted: make(chan struct{}),
 	}
 }
 
 type saver struct {
-	capacity int
-	runners  chan *models.Runner
-	done     chan struct{}
-	alarm    time.Alarm
-	flusher  flusher.Flusher
+	capacity       int
+	runners        chan *models.Runner
+	done           chan struct{}
+	alarm          time.Alarm
+	flusher        flusher.Flusher
+	flusherStarted chan struct{}
 }
 
 // Init initializes saver instance
 func (s *saver) Init(ctx context.Context) {
 	go s.flushing(ctx)
+	<-s.flusherStarted
 }
 
 // Save saves the runner
@@ -55,6 +58,9 @@ func (s *saver) flushing(ctx context.Context) {
 
 	alarms := s.alarm.Alarm()
 
+	readyToFlush := make(chan struct{}, 1)
+	readyToFlush <- struct{}{}
+
 	for {
 		select {
 		case runner := <-s.runners:
@@ -68,6 +74,9 @@ func (s *saver) flushing(ctx context.Context) {
 			_ = s.flusher.Flush(ctx, runners)
 			close(s.done)
 			return
+
+		case <-readyToFlush:
+			close(s.flusherStarted)
 		}
 	}
 }
@@ -75,5 +84,4 @@ func (s *saver) flushing(ctx context.Context) {
 // Close quits the saver
 func (s *saver) Close() {
 	<-s.done
-	close(s.runners)
 }

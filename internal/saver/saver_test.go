@@ -2,11 +2,11 @@ package saver_test
 
 import (
 	"context"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
 	"github.com/ozoncp/ocp-runner-api/internal/mocks"
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	"github.com/ozoncp/ocp-runner-api/internal/saver"
@@ -94,3 +94,28 @@ var _ = Describe("Saver", func() {
 		})
 	})
 })
+
+func TestSaver_Save(t *testing.T) {
+
+	t.Run("save should not return error when flushing gourutine running", func(t *testing.T) {
+		var (
+			ctrl        = gomock.NewController(GinkgoT())
+			mockAlarm   = mocks.NewMockAlarm(ctrl)
+			sv          = saver.NewSaver(10, mockAlarm, nil)
+			ctx, cancel = context.WithCancel(context.Background())
+
+			alarmCh chan struct{}
+		)
+		mockAlarm.EXPECT().Alarm().Return(alarmCh)
+
+		defer cancel()
+		sv.Init(ctx)
+
+		ctx2 := context.Background()
+		err := sv.Save(ctx2, &models.Runner{Arch: "foo", Os: "bar", Guid: "some_id"})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+}
