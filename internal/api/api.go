@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/ozoncp/ocp-runner-api/internal/broker"
 	"github.com/ozoncp/ocp-runner-api/internal/models"
-	"github.com/ozoncp/ocp-runner-api/internal/producer"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	"github.com/ozoncp/ocp-runner-api/internal/utils"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
@@ -19,11 +19,11 @@ import (
 type api struct {
 	server.UnimplementedOcpRunnerServiceServer
 	repo repo.Repo
-	prod producer.Producer
+	prod broker.Producer
 }
 
 // NewRunnerApi constructor
-func NewRunnerApi(repo repo.Repo, prod producer.Producer) server.OcpRunnerServiceServer {
+func NewRunnerApi(repo repo.Repo, prod broker.Producer) server.OcpRunnerServiceServer {
 	return &api{
 		repo: repo,
 		prod: prod,
@@ -50,7 +50,7 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 	}
 
 	payload := map[string]interface{}{"guid": runner.Guid, "os": runner.Os, "arch": runner.Arch}
-	if err := a.publishEvent("runners", models.Created, payload); err != nil {
+	if err := a.publishEvent("events", models.Created, payload); err != nil {
 		return nil, status.Error(codes.Internal, "failed to publish created event")
 	}
 
@@ -98,7 +98,7 @@ func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequ
 	}
 
 	payload := map[string]interface{}{"guid": runner.Guid, "new_os": runner.Os, "new_arch": runner.Arch}
-	if err := a.publishEvent("runners", models.Updated, payload); err != nil {
+	if err := a.publishEvent("events", models.Updated, payload); err != nil {
 		return nil, status.Error(codes.Internal, "failed to publish updated event")
 	}
 
@@ -118,7 +118,7 @@ func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequ
 	}
 
 	payload := map[string]interface{}{"guid": request.Guid}
-	if err := a.publishEvent("runners", models.Removed, payload); err != nil {
+	if err := a.publishEvent("events", models.Removed, payload); err != nil {
 		return nil, status.Error(codes.Internal, "failed to publish removed event")
 	}
 

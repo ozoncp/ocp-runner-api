@@ -5,7 +5,6 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/rs/zerolog/log"
 
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
@@ -104,9 +103,6 @@ func (r *repo) ListRunners(ctx context.Context, filters *server.ListFiltersReque
 	query = appendFilter(query, filters.Guids, "guid")
 	query = appendFilter(query, filters.Os, "os")
 	query = appendFilter(query, filters.Arch, "arch")
-
-	sql, _, _ := query.ToSql()
-	log.Debug().Str("sql", sql).Send()
 
 	rows, err := query.QueryContext(ctx)
 	if err != nil {

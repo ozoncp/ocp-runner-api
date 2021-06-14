@@ -14,8 +14,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/ozoncp/ocp-runner-api/internal/broker"
 	"github.com/ozoncp/ocp-runner-api/internal/config"
-	"github.com/ozoncp/ocp-runner-api/internal/producer"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
@@ -62,12 +62,12 @@ func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
 	}
 	defer db.Close()
 
-	prod := producer.New()
-	if err := prod.Init(config.KafkaBrokers); err != nil {
+	prod, cons, err := initBrokers(config)
+	if err != nil {
 		ec <- err
 		return
 	}
-	defer prod.Close()
+	defer func() { prod.Close(); cons.Close() }()
 
 	repository := repo.New(db)
 	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository, prod))
@@ -94,4 +94,22 @@ func connectDatabase(config *config.Config) (*sqlx.DB, error) {
 
 	log.Info().Msg("db: successfully connected")
 	return db, nil
+}
+
+// initBrokers initialize kafka brokers
+func initBrokers(config *config.Config) (broker.Producer, broker.Consumer, error) {
+	prod := broker.NewProducer()
+	if err := prod.Init(config.KafkaBrokers); err != nil {
+		return nil, nil, err
+	}
+
+	cons := broker.NewConsumer()
+	if err := cons.Init(config.KafkaBrokers); err != nil {
+		return prod, nil, err
+	}
+	if err := cons.Subscribe("events"); err != nil {
+		return prod, nil, err
+	}
+
+	return prod, cons, nil
 }

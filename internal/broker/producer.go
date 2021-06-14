@@ -1,4 +1,4 @@
-package producer
+package broker
 
 import (
 	"encoding/json"
@@ -14,8 +14,8 @@ type Producer interface {
 	Close()
 }
 
-// New constructor
-func New() Producer {
+// NewProducer constructor
+func NewProducer() Producer {
 	return &producer{}
 }
 
@@ -23,7 +23,7 @@ type producer struct {
 	sp sarama.SyncProducer
 }
 
-// Init initialize producer
+// Init initialize broker
 func (p *producer) Init(brokers []string) error {
 	config := sarama.NewConfig()
 	config.Producer.Partitioner = sarama.NewRandomPartitioner
@@ -34,9 +34,7 @@ func (p *producer) Init(brokers []string) error {
 	if err != nil {
 		return err
 	}
-
 	p.sp = prod
-
 	return nil
 }
 
@@ -46,9 +44,7 @@ func (p *producer) SendMessage(topic string, event *models.RunnerEvent) error {
 	if err != nil {
 		return err
 	}
-
 	_, _, err = p.sp.SendMessage(message)
-
 	return err
 }
 
@@ -68,7 +64,7 @@ func (p *producer) prepareMessage(topic string, event *models.RunnerEvent) (*sar
 	return result, nil
 }
 
-// Close closes sarama producer
+// Close closes sarama broker
 func (p *producer) Close() {
 	p.sp.Close()
 }
