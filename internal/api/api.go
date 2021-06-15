@@ -34,7 +34,6 @@ func NewRunnerApi(repo repo.Repo, prod broker.Producer) server.OcpRunnerServiceS
 // CreateRunner creates new runner
 func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequest) (*server.CreateRunnerResponse, error) {
 	log.Info().Str("action", "create runner").Send()
-	metrics.IncMethodsCalls("CreateRunner")
 
 	guid, err := uuid.NewUUID()
 	if err != nil {
@@ -56,13 +55,14 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 		return nil, status.Error(codes.Internal, "failed to publish created event")
 	}
 
+	metrics.IncMethodsCalls("CreateRunner")
+
 	return &server.CreateRunnerResponse{}, nil
 }
 
 // MultiCreateRunner create new runners
 func (a *api) MultiCreateRunner(ctx context.Context, request *server.MultiCreateRunnerRequest) (*server.MultiCreateRunnerResponse, error) {
 	log.Info().Str("action", "multi create runner").Send()
-	metrics.IncMethodsCalls("MultiCreateRunner")
 
 	var runners []*models.Runner
 	for _, r := range request.Runners {
@@ -81,13 +81,14 @@ func (a *api) MultiCreateRunner(ctx context.Context, request *server.MultiCreate
 		}
 	}
 
+	metrics.IncMethodsCalls("MultiCreateRunner")
+
 	return &server.MultiCreateRunnerResponse{}, nil
 }
 
 // UpdateRunner updates runner
 func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequest) (*server.UpdateRunnerResponse, error) {
 	log.Info().Str("action", "update runner").Send()
-	metrics.IncMethodsCalls("UpdateRunner")
 
 	if len(request.Guid) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "received empty guid")
@@ -108,13 +109,14 @@ func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequ
 		return nil, status.Error(codes.Internal, "failed to publish updated event")
 	}
 
+	metrics.IncMethodsCalls("UpdateRunner")
+
 	return &server.UpdateRunnerResponse{}, nil
 }
 
 // RemoveRunner removes runner
 func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequest) (*server.RemoveRunnerResponse, error) {
 	log.Info().Str("action", "remove runner").Send()
-	metrics.IncMethodsCalls("RemoveRunner")
 
 	if len(request.Guid) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "received empty guid")
@@ -129,13 +131,14 @@ func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequ
 		return nil, status.Error(codes.Internal, "failed to publish removed event")
 	}
 
+	metrics.IncMethodsCalls("RemoveRunner")
+
 	return &server.RemoveRunnerResponse{}, nil
 }
 
 // ListRunners returns list of all existing runners
 func (a *api) ListRunners(ctx context.Context, request *server.ListFiltersRequest) (*server.RunnersListResponse, error) {
 	log.Info().Str("action", "list runners").Send()
-	metrics.IncMethodsCalls("ListRunners")
 
 	runners, err := a.repo.ListRunners(ctx, request)
 	if err != nil {
@@ -150,6 +153,8 @@ func (a *api) ListRunners(ctx context.Context, request *server.ListFiltersReques
 			Arch: runner.Arch,
 		}
 	}
+
+	metrics.IncMethodsCalls("ListRunners")
 
 	return &server.RunnersListResponse{Runners: grpcRunners}, nil
 }
