@@ -29,6 +29,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	db, err := connectToDB(cfg)
+	if err != nil {
+		os.Exit(0)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Error().Err(err).Send()
+		}
+	}()
+
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, os.Interrupt)
 
@@ -36,7 +46,7 @@ func main() {
 	defer grpcServer.GracefulStop()
 
 	ec := make(chan error)
-	go runGrpc(grpcServer, cfg, ec)
+	go runGrpc(grpcServer, db, cfg, ec)
 
 	select {
 	case err := <-ec:
@@ -47,19 +57,12 @@ func main() {
 }
 
 // runGrpc runs gRPC server
-func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
+func runGrpc(grpcServer *grpc.Server, db *sqlx.DB, config *config.Config, ec chan<- error) {
 	listen, err := net.Listen("tcp", config.GrpcPort)
 	if err != nil {
 		ec <- err
 		return
 	}
-
-	db, err := connectDatabase(config)
-	if err != nil {
-		ec <- err
-		return
-	}
-	defer db.Close()
 
 	repository := repo.New(db)
 	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository))
@@ -70,16 +73,11 @@ func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
 	}
 }
 
-// connectDatabase initializes DB connection
-func connectDatabase(config *config.Config) (*sqlx.DB, error) {
+// connectToDB initializes database connection
+func connectToDB(config *config.Config) (*sqlx.DB, error) {
 	log.Info().Msg("db: connecting...")
 
 	db, err := sqlx.Connect("postgres", config.Database)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}
