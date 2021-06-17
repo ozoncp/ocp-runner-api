@@ -5,6 +5,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
@@ -16,6 +17,7 @@ type Repo interface {
 	UpdateRunner(ctx context.Context, runner *models.Runner) error
 	RemoveRunner(ctx context.Context, guid string) error
 	ListRunners(ctx context.Context, filters *server.ListFiltersRequest) ([]*models.Runner, error)
+	Close()
 }
 
 type repo struct {
@@ -132,4 +134,11 @@ func appendFilter(query squirrel.SelectBuilder, filter []string, field string) s
 	}
 
 	return query
+}
+
+// Close closes db connection
+func (r *repo) Close() {
+	if err := r.db.Close(); err != nil {
+		log.Error().Err(err).Send()
+	}
 }

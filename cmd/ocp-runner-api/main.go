@@ -23,25 +23,48 @@ import (
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
 
+const (
+	configPath = "config.yml"
+)
+
+type context struct {
+	config     *config.Config
+	repo       repo.Repo
+	producer   broker.Producer
+	consumer   broker.Consumer
+	grpcServer *grpc.Server
+}
+
 func init() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
 }
 
 func main() {
-	cfg, err := config.Read("config.yml")
-	if err != nil {
-		os.Exit(1)
+	ctx := &context{}
+
+	if err := readConfig(ctx); err != nil {
+		log.Fatal().Err(err).Send()
 	}
 
+	if err := connectToDatabase(ctx); err != nil {
+		log.Fatal().Err(err).Send()
+	}
+	defer ctx.repo.Close()
+
+	if err := connectToBroker(ctx); err != nil {
+		log.Fatal().Err(err).Send()
+	}
+	defer func() { ctx.producer.Close(); ctx.consumer.Close() }()
+
+	ctx.grpcServer = grpc.NewServer()
+	defer ctx.grpcServer.GracefulStop()
+
+	ec := make(chan error)
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, os.Interrupt)
 
-	grpcServer := grpc.NewServer()
-	defer grpcServer.GracefulStop()
-
-	ec := make(chan error)
-	go runMetrics(cfg, ec)
-	go runGrpc(grpcServer, cfg, ec)
+	go runGrpc(ctx, ec)
+	go runMetrics(ctx, ec)
 
 	select {
 	case err := <-ec:
@@ -52,78 +75,73 @@ func main() {
 }
 
 // runGrpc runs gRPC server
-func runGrpc(grpcServer *grpc.Server, config *config.Config, ec chan<- error) {
-	listen, err := net.Listen("tcp", config.GrpcPort)
+func runGrpc(ctx *context, ec chan<- error) {
+	listen, err := net.Listen("tcp", ctx.config.GrpcPort)
 	if err != nil {
 		ec <- err
 		return
 	}
 
-	db, err := connectDatabase(config)
-	if err != nil {
-		ec <- err
-		return
-	}
-	defer db.Close()
+	server.RegisterOcpRunnerServiceServer(ctx.grpcServer, api.NewRunnerApi(ctx.repo, ctx.producer))
+	log.Info().Str("gRPC server started at", ctx.config.GrpcPort).Send()
 
-	prod, cons, err := initBrokers(config)
-	if err != nil {
-		ec <- err
-		return
-	}
-	defer func() { prod.Close(); cons.Close() }()
-
-	repository := repo.New(db)
-	server.RegisterOcpRunnerServiceServer(grpcServer, api.NewRunnerApi(repository, prod))
-	log.Info().Str("gRPC server started at", config.GrpcPort).Send()
-
-	if err := grpcServer.Serve(listen); err != nil {
+	if err := ctx.grpcServer.Serve(listen); err != nil {
 		ec <- err
 	}
-}
-
-// connectDatabase initializes DB connection
-func connectDatabase(config *config.Config) (*sqlx.DB, error) {
-	log.Info().Msg("db: connecting...")
-
-	db, err := sqlx.Connect("postgres", config.Database)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	log.Info().Msg("db: successfully connected")
-	return db, nil
-}
-
-// initBrokers initialize kafka brokers
-func initBrokers(config *config.Config) (broker.Producer, broker.Consumer, error) {
-	prod := broker.NewProducer()
-	if err := prod.Init(config.KafkaBrokers); err != nil {
-		return nil, nil, err
-	}
-
-	cons := broker.NewConsumer()
-	if err := cons.Init(config.KafkaBrokers); err != nil {
-		return prod, nil, err
-	}
-	if err := cons.Subscribe("events"); err != nil {
-		return prod, nil, err
-	}
-
-	return prod, cons, nil
 }
 
 // runMetrics runs prometheus
-func runMetrics(config *config.Config, ec chan<- error) {
+func runMetrics(ctx *context, ec chan<- error) {
 	metrics.RegisterMetrics()
 
-	http.Handle(config.MetricsHandle, promhttp.Handler())
-	if err := http.ListenAndServe(config.MetricsPort, nil); err != nil {
+	http.Handle(ctx.config.MetricsHandle, promhttp.Handler())
+	if err := http.ListenAndServe(ctx.config.MetricsPort, nil); err != nil {
 		ec <- err
 	}
+}
+
+// readConfig reads config
+func readConfig(ctx *context) error {
+	cfg, err := config.Read(configPath)
+	if err != nil {
+		return err
+	}
+	ctx.config = cfg
+	return nil
+}
+
+// connectToDatabase initializes database connection
+func connectToDatabase(ctx *context) error {
+	log.Info().Msg("connection to database...")
+
+	db, err := sqlx.Connect("postgres", ctx.config.Database)
+	if err != nil {
+		return err
+	}
+
+	log.Info().Msg("successfully connected!")
+	ctx.repo = repo.New(db)
+
+	return nil
+}
+
+// connectToBroker connects to kafka broker
+func connectToBroker(ctx *context) error {
+	prod := broker.NewProducer()
+	if err := prod.Init(ctx.config.KafkaBrokers); err != nil {
+		return err
+	}
+
+	cons := broker.NewConsumer()
+	if err := cons.Init(ctx.config.KafkaBrokers); err != nil {
+		return err
+	}
+	if err := cons.Subscribe("events"); err != nil {
+		return err
+	}
+
+	ctx.producer = prod
+	ctx.consumer = cons
+
+	return nil
 }
