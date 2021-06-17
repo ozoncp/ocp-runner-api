@@ -26,12 +26,12 @@ func init() {
 func main() {
 	cfg, err := config.Read("config.yml")
 	if err != nil {
-		os.Exit(1)
+		log.Fatal().Err(err).Send()
 	}
 
 	db, err := connectToDB(cfg)
 	if err != nil {
-		os.Exit(0)
+		log.Fatal().Err(err).Send()
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
