@@ -1,6 +1,25 @@
 version: "3.9"
+
 services:
+  runner-db:
+    image: postgres
+    ports:
+    - "5432:5432"
+    restart: always
+    volumes:
+      - postgres_database:/var/lib/postgresql/data:Z
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
   runner-api:
     build: .
     ports:
       - "7002:7002"
+    depends_on:
+      - runner-db
+
+volumes:
+  postgres_database:
+    external: true

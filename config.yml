@@ -4,6 +4,7 @@ author: "Artem B."
 http_port: ":7000"
 grpc_port: ":7002"
 swagger_dir: "swagger"
+database: "host=runner-db port=5432 user=postgres password=postgres dbname=runners sslmode=disable"
 
 # Remove old api images
 # docker rmi $(docker images "ocp-*" --format "{{.ID}}")

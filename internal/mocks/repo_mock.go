@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	models "github.com/ozoncp/ocp-runner-api/internal/models"
+	ocp_runner_api "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
 
 // MockRepo is a mock of Repo interface.
@@ -64,18 +65,18 @@ func (mr *MockRepoMockRecorder) AddRunners(arg0, arg1 interface{}) *gomock.Call 
 }
 
 // ListRunners mocks base method.
-func (m *MockRepo) ListRunners(arg0 context.Context) ([]*models.Runner, error) {
+func (m *MockRepo) ListRunners(arg0 context.Context, arg1 *ocp_runner_api.ListFiltersRequest) ([]*models.Runner, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListRunners", arg0)
+	ret := m.ctrl.Call(m, "ListRunners", arg0, arg1)
 	ret0, _ := ret[0].([]*models.Runner)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListRunners indicates an expected call of ListRunners.
-func (mr *MockRepoMockRecorder) ListRunners(arg0 interface{}) *gomock.Call {
+func (mr *MockRepoMockRecorder) ListRunners(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRunners", reflect.TypeOf((*MockRepo)(nil).ListRunners), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListRunners", reflect.TypeOf((*MockRepo)(nil).ListRunners), arg0, arg1)
 }
 
 // RemoveRunner mocks base method.
