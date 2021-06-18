@@ -19,6 +19,7 @@ import (
 // CRUD runner API
 type api struct {
 	server.UnimplementedOcpRunnerServiceServer
+
 	repo repo.Repo
 	prod broker.Producer
 }
@@ -39,9 +40,10 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create new guid")
 	}
+	guidStr := guid.String()
 
 	runner := models.Runner{
-		Guid: guid.String(),
+		Guid: guidStr,
 		Os:   request.Os,
 		Arch: request.Arch,
 	}
@@ -57,7 +59,7 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 
 	metrics.IncMethodsCalls("CreateRunner")
 
-	return &server.CreateRunnerResponse{}, nil
+	return &server.CreateRunnerResponse{Guid: guidStr}, nil
 }
 
 // MultiCreateRunner create new runners

@@ -112,6 +112,8 @@ func (m *CreateRunnerResponse) Validate() error {
 		return nil
 	}
 
+	// no validation rules for Guid
+
 	return nil
 }
 

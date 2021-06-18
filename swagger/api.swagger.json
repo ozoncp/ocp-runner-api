@@ -25,7 +25,12 @@
       "title": "CREATE"
     },
     "apiCreateRunnerResponse": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "guid": {
+          "type": "string"
+        }
+      }
     },
     "apiMultiCreateRunnerResponse": {
       "type": "object"

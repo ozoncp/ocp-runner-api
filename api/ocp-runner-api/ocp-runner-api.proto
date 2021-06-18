@@ -18,7 +18,9 @@ message CreateRunnerRequest {
   string arch = 2;
 }
 
-message CreateRunnerResponse {}
+message CreateRunnerResponse {
+  string guid = 1;
+}
 
 // MULTI CREATE
 message MultiCreateRunnerRequest {

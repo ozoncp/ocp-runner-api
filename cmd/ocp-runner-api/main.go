@@ -27,7 +27,7 @@ const (
 	configPath = "config.yml"
 )
 
-type context struct {
+type app struct {
 	config     *config.Config
 	repo       repo.Repo
 	producer   broker.Producer
@@ -40,7 +40,7 @@ func init() {
 }
 
 func main() {
-	ctx := &context{}
+	ctx := &app{}
 
 	if err := readConfig(ctx); err != nil {
 		log.Fatal().Err(err).Send()
@@ -75,73 +75,73 @@ func main() {
 }
 
 // runGrpc runs gRPC server
-func runGrpc(ctx *context, ec chan<- error) {
-	listen, err := net.Listen("tcp", ctx.config.GrpcPort)
+func runGrpc(app *app, ec chan<- error) {
+	listen, err := net.Listen("tcp", app.config.GrpcPort)
 	if err != nil {
 		ec <- err
 		return
 	}
 
-	server.RegisterOcpRunnerServiceServer(ctx.grpcServer, api.NewRunnerApi(ctx.repo, ctx.producer))
-	log.Info().Str("gRPC server started at", ctx.config.GrpcPort).Send()
+	server.RegisterOcpRunnerServiceServer(app.grpcServer, api.NewRunnerApi(app.repo, app.producer))
+	log.Info().Str("gRPC server started at", app.config.GrpcPort).Send()
 
-	if err := ctx.grpcServer.Serve(listen); err != nil {
+	if err := app.grpcServer.Serve(listen); err != nil {
 		ec <- err
 	}
 }
 
 // runMetrics runs prometheus
-func runMetrics(ctx *context, ec chan<- error) {
+func runMetrics(app *app, ec chan<- error) {
 	metrics.RegisterMetrics()
 
-	http.Handle(ctx.config.MetricsHandle, promhttp.Handler())
-	if err := http.ListenAndServe(ctx.config.MetricsPort, nil); err != nil {
+	http.Handle(app.config.MetricsHandle, promhttp.Handler())
+	if err := http.ListenAndServe(app.config.MetricsPort, nil); err != nil {
 		ec <- err
 	}
 }
 
 // readConfig reads config
-func readConfig(ctx *context) error {
+func readConfig(app *app) error {
 	cfg, err := config.Read(configPath)
 	if err != nil {
 		return err
 	}
-	ctx.config = cfg
+	app.config = cfg
 	return nil
 }
 
 // connectToDatabase initializes database connection
-func connectToDatabase(ctx *context) error {
+func connectToDatabase(app *app) error {
 	log.Info().Msg("connection to database...")
 
-	db, err := sqlx.Connect("postgres", ctx.config.Database)
+	db, err := sqlx.Connect("postgres", app.config.Database)
 	if err != nil {
 		return err
 	}
 
 	log.Info().Msg("successfully connected!")
-	ctx.repo = repo.New(db)
+	app.repo = repo.New(db)
 
 	return nil
 }
 
 // connectToBroker connects to kafka broker
-func connectToBroker(ctx *context) error {
+func connectToBroker(app *app) error {
 	prod := broker.NewProducer()
-	if err := prod.Init(ctx.config.KafkaBrokers); err != nil {
+	if err := prod.Init(app.config.KafkaBrokers); err != nil {
 		return err
 	}
 
 	cons := broker.NewConsumer()
-	if err := cons.Init(ctx.config.KafkaBrokers); err != nil {
+	if err := cons.Init(app.config.KafkaBrokers); err != nil {
 		return err
 	}
 	if err := cons.Subscribe("events"); err != nil {
 		return err
 	}
 
-	ctx.producer = prod
-	ctx.consumer = cons
+	app.producer = prod
+	app.consumer = cons
 
 	return nil
 }
