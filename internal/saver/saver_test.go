@@ -26,9 +26,7 @@ var _ = Describe("Saver", func() {
 		mockFlusher *mocks.MockFlusher
 		mockAlarm   *mocks.MockAlarm
 
-		runner *models.Runner
 		s      saver.Saver
-
 		alarms chan struct{}
 	)
 
@@ -47,12 +45,31 @@ var _ = Describe("Saver", func() {
 
 	JustBeforeEach(func() {
 		s.Init(ctx)
-		err = s.Save(ctx, runner)
+		err = s.Save(ctx, &models.Runner{})
 	})
 
 	AfterEach(func() {
 		s.Close()
 		ctrl.Finish()
+	})
+
+	Context("on save in init saver", func() {
+		var (
+			cancelFunc context.CancelFunc
+		)
+
+		BeforeEach(func() {
+			ctx, cancelFunc = context.WithCancel(ctx)
+			mockFlusher.EXPECT().Flush(gomock.Any(), gomock.Any()).Return(nil).MinTimes(1).MaxTimes(2)
+		})
+
+		JustAfterEach(func() {
+			cancelFunc()
+		})
+
+		It("saver returns no errors", func() {
+			Expect(err).Should(BeNil())
+		})
 	})
 
 	Context("if context cancel called", func() {
@@ -69,7 +86,7 @@ var _ = Describe("Saver", func() {
 			cancelFunc()
 		})
 
-		It("flusher returns no errors", func() {
+		It("saver returns no errors", func() {
 			Expect(err).Should(BeNil())
 		})
 	})

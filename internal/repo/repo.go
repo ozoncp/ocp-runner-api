@@ -17,6 +17,7 @@ type Repo interface {
 	UpdateRunner(ctx context.Context, runner *models.Runner) error
 	RemoveRunner(ctx context.Context, guid string) error
 	ListRunners(ctx context.Context, filters *server.ListFiltersRequest) ([]*models.Runner, error)
+	Close()
 }
 
 type repo struct {
@@ -105,9 +106,6 @@ func (r *repo) ListRunners(ctx context.Context, filters *server.ListFiltersReque
 	query = appendFilter(query, filters.Os, "os")
 	query = appendFilter(query, filters.Arch, "arch")
 
-	sql, _, _ := query.ToSql()
-	log.Debug().Str("sql", sql).Send()
-
 	rows, err := query.QueryContext(ctx)
 	if err != nil {
 		return nil, err
@@ -136,4 +134,11 @@ func appendFilter(query squirrel.SelectBuilder, filter []string, field string) s
 	}
 
 	return query
+}
+
+// Close closes db connection
+func (r *repo) Close() {
+	if err := r.db.Close(); err != nil {
+		log.Error().Err(err).Send()
+	}
 }

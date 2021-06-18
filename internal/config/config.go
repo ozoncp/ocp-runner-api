@@ -8,13 +8,16 @@ import (
 )
 
 type Config struct {
-	Project    string `yaml:"project"`
-	Version    string `yaml:"version"`
-	Author     string `yaml:"author"`
-	HttpPort   string `yaml:"http_port"`
-	GrpcPort   string `yaml:"grpc_port"`
-	SwaggerDir string `yaml:"swagger_dir"`
-	Database   string `yaml:"database"`
+	Project       string   `yaml:"project"`
+	Version       string   `yaml:"version"`
+	Author        string   `yaml:"author"`
+	HttpPort      string   `yaml:"http_port"`
+	GrpcPort      string   `yaml:"grpc_port"`
+	MetricsPort   string   `yaml:"metrics_port"`
+	MetricsHandle string   `yaml:"metrics_handle"`
+	SwaggerDir    string   `yaml:"swagger_dir"`
+	Database      string   `yaml:"database"`
+	KafkaBrokers  []string `yaml:"kafka_brokers"`
 }
 
 // Read reads config from file

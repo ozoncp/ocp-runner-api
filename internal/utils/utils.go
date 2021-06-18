@@ -35,10 +35,10 @@ func GroupByGuid(runners []*models.Runner) (map[string]*models.Runner, error) {
 	result := make(map[string]*models.Runner, len(runners))
 
 	for _, runner := range runners {
-		if _, found := result[runner.GetGuid()]; found {
-			return nil, fmt.Errorf("guid %v already exist in result map", runner.GetGuid())
+		if _, found := result[runner.Guid]; found {
+			return nil, fmt.Errorf("guid %v already exist in result map", runner.Guid)
 		}
-		result[runner.GetGuid()] = runner
+		result[runner.Guid] = runner
 	}
 
 	return result, nil

@@ -19,6 +19,7 @@ type Saver interface {
 func NewSaver(capacity int, alarm time.Alarm, flusher flusher.Flusher) Saver {
 	return &saver{
 		capacity: capacity,
+		started:  make(chan struct{}),
 		runners:  make(chan *models.Runner),
 		done:     make(chan struct{}),
 		alarm:    alarm,
@@ -28,6 +29,7 @@ func NewSaver(capacity int, alarm time.Alarm, flusher flusher.Flusher) Saver {
 
 type saver struct {
 	capacity int
+	started  chan struct{}
 	runners  chan *models.Runner
 	done     chan struct{}
 	alarm    time.Alarm
@@ -37,6 +39,7 @@ type saver struct {
 // Init initializes saver instance
 func (s *saver) Init(ctx context.Context) {
 	go s.flushing(ctx)
+	<-s.started
 }
 
 // Save saves the runner
@@ -53,6 +56,9 @@ func (s *saver) Save(_ context.Context, runner *models.Runner) error {
 func (s *saver) flushing(ctx context.Context) {
 	var runners []*models.Runner
 
+	readyToFlush := make(chan struct{}, 1)
+	readyToFlush <- struct{}{}
+
 	alarms := s.alarm.Alarm()
 
 	for {
@@ -68,6 +74,8 @@ func (s *saver) flushing(ctx context.Context) {
 			_ = s.flusher.Flush(ctx, runners)
 			close(s.done)
 			return
+		case <-readyToFlush:
+			close(s.started)
 		}
 	}
 }

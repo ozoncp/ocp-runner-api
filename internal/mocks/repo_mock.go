@@ -64,6 +64,18 @@ func (mr *MockRepoMockRecorder) AddRunners(arg0, arg1 interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddRunners", reflect.TypeOf((*MockRepo)(nil).AddRunners), arg0, arg1)
 }
 
+// Close mocks base method.
+func (m *MockRepo) Close() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Close")
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockRepoMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockRepo)(nil).Close))
+}
+
 // ListRunners mocks base method.
 func (m *MockRepo) ListRunners(arg0 context.Context, arg1 *ocp_runner_api.ListFiltersRequest) ([]*models.Runner, error) {
 	m.ctrl.T.Helper()

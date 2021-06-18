@@ -3,8 +3,12 @@ version: "0.0.1"
 author: "Artem B."
 http_port: ":7000"
 grpc_port: ":7002"
+metrics_port: ":9101"
+metrics_handle: "/metrics"
 swagger_dir: "swagger"
-database: "host=runner-db port=5432 user=postgres password=postgres dbname=runners sslmode=disable"
+database: "host=database port=5432 user=postgres password=postgres dbname=runners sslmode=disable"
+kafka_brokers:
+  - "kafka:9092"
 
 # Remove old api images
 # docker rmi $(docker images "ocp-*" --format "{{.ID}}")

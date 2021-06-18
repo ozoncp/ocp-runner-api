@@ -10,6 +10,7 @@ import (
 	sqlxmock "github.com/zhashkevych/go-sqlxmock"
 
 	"github.com/ozoncp/ocp-runner-api/internal/api"
+	"github.com/ozoncp/ocp-runner-api/internal/mocks"
 	"github.com/ozoncp/ocp-runner-api/internal/repo"
 	server "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api"
 )
@@ -21,8 +22,9 @@ var _ = Describe("Api", func() {
 		ctrl *gomock.Controller
 		ctx  context.Context
 
-		db     *sqlx.DB
-		dbMock sqlxmock.Sqlmock
+		db       *sqlx.DB
+		dbMock   sqlxmock.Sqlmock
+		prodMock *mocks.MockProducer
 
 		r       repo.Repo
 		service server.OcpRunnerServiceServer
@@ -34,7 +36,11 @@ var _ = Describe("Api", func() {
 
 		db, dbMock, err = sqlxmock.Newx()
 		r = repo.New(db)
-		service = api.NewRunnerApi(r)
+
+		prodMock = mocks.NewMockProducer(ctrl)
+		prodMock.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Return(nil).AnyTimes()
+
+		service = api.NewRunnerApi(r, prodMock)
 	})
 
 	AfterEach(func() {
@@ -70,12 +76,12 @@ var _ = Describe("Api", func() {
 
 	Context("if describe method called", func() {
 		var (
-			request  *server.DescribeRunnerRequest
-			response *server.DescribeRunnerResponse
+			request  *server.UpdateRunnerRequest
+			response *server.UpdateRunnerResponse
 		)
 
 		BeforeEach(func() {
-			request = &server.DescribeRunnerRequest{
+			request = &server.UpdateRunnerRequest{
 				Guid: "not_empty",
 				Os:   "new_val",
 				Arch: "new_val",
@@ -86,7 +92,7 @@ var _ = Describe("Api", func() {
 				WithArgs(request.Os, request.Arch, request.Guid).
 				WillReturnResult(sqlxmock.NewResult(0, 1))
 
-			response, err = service.DescribeRunner(ctx, request)
+			response, err = service.UpdateRunner(ctx, request)
 		})
 
 		It("should be updated existing runner", func() {
@@ -97,12 +103,12 @@ var _ = Describe("Api", func() {
 
 	Context("if describe method called with one field", func() {
 		var (
-			request  *server.DescribeRunnerRequest
-			response *server.DescribeRunnerResponse
+			request  *server.UpdateRunnerRequest
+			response *server.UpdateRunnerResponse
 		)
 
 		BeforeEach(func() {
-			request = &server.DescribeRunnerRequest{
+			request = &server.UpdateRunnerRequest{
 				Guid: "not_empty",
 				Os:   "new_val",
 			}
@@ -112,7 +118,7 @@ var _ = Describe("Api", func() {
 				WithArgs(request.Os, request.Guid).
 				WillReturnResult(sqlxmock.NewResult(0, 1))
 
-			response, err = service.DescribeRunner(ctx, request)
+			response, err = service.UpdateRunner(ctx, request)
 		})
 
 		It("should be updated existing runner", func() {
@@ -123,13 +129,13 @@ var _ = Describe("Api", func() {
 
 	Context("if describe method called without guid", func() {
 		var (
-			request  *server.DescribeRunnerRequest
-			response *server.DescribeRunnerResponse
+			request  *server.UpdateRunnerRequest
+			response *server.UpdateRunnerResponse
 		)
 
 		BeforeEach(func() {
-			request = &server.DescribeRunnerRequest{}
-			response, err = service.DescribeRunner(ctx, request)
+			request = &server.UpdateRunnerRequest{}
+			response, err = service.UpdateRunner(ctx, request)
 		})
 
 		It("should be error", func() {
@@ -140,19 +146,19 @@ var _ = Describe("Api", func() {
 
 	Context("if describe method called without any new fields", func() {
 		var (
-			request  *server.DescribeRunnerRequest
-			response *server.DescribeRunnerResponse
+			request  *server.UpdateRunnerRequest
+			response *server.UpdateRunnerResponse
 		)
 
 		BeforeEach(func() {
-			request = &server.DescribeRunnerRequest{Guid: "some_guid"}
+			request = &server.UpdateRunnerRequest{Guid: "some_guid"}
 
 			dbMock.
 				ExpectExec("UPDATE runners").
 				WithArgs(request.Guid, request.Os, request.Arch).
 				WillReturnResult(sqlxmock.NewResult(0, 1))
 
-			response, err = service.DescribeRunner(ctx, request)
+			response, err = service.UpdateRunner(ctx, request)
 		})
 
 		It("should be error", func() {

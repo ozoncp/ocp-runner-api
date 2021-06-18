@@ -12,10 +12,27 @@
   ],
   "paths": {},
   "definitions": {
-    "apiCreateRunnerResponse": {
-      "type": "object"
+    "apiCreateRunnerRequest": {
+      "type": "object",
+      "properties": {
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        }
+      },
+      "title": "CREATE"
     },
-    "apiDescribeRunnerResponse": {
+    "apiCreateRunnerResponse": {
+      "type": "object",
+      "properties": {
+        "guid": {
+          "type": "string"
+        }
+      }
+    },
+    "apiMultiCreateRunnerResponse": {
       "type": "object"
     },
     "apiRemoveRunnerResponse": {
@@ -45,6 +62,9 @@
           }
         }
       }
+    },
+    "apiUpdateRunnerResponse": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",
