@@ -36,6 +36,10 @@ func NewRunnerApi(repo repo.Repo, prod broker.Producer) server.OcpRunnerServiceS
 func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequest) (*server.CreateRunnerResponse, error) {
 	log.Info().Str("action", "create runner").Send()
 
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
 	guid, err := uuid.NewUUID()
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to create new guid")
@@ -66,6 +70,10 @@ func (a *api) CreateRunner(ctx context.Context, request *server.CreateRunnerRequ
 func (a *api) MultiCreateRunner(ctx context.Context, request *server.MultiCreateRunnerRequest) (*server.MultiCreateRunnerResponse, error) {
 	log.Info().Str("action", "multi create runner").Send()
 
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
 	var runners []*models.Runner
 	for _, r := range request.Runners {
 		guid, _ := uuid.NewUUID()
@@ -92,8 +100,8 @@ func (a *api) MultiCreateRunner(ctx context.Context, request *server.MultiCreate
 func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequest) (*server.UpdateRunnerResponse, error) {
 	log.Info().Str("action", "update runner").Send()
 
-	if len(request.Guid) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "received empty guid")
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	runner := models.Runner{
@@ -120,8 +128,8 @@ func (a *api) UpdateRunner(ctx context.Context, request *server.UpdateRunnerRequ
 func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequest) (*server.RemoveRunnerResponse, error) {
 	log.Info().Str("action", "remove runner").Send()
 
-	if len(request.Guid) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "received empty guid")
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 
 	if err := a.repo.RemoveRunner(ctx, request.Guid); err != nil {
@@ -138,9 +146,37 @@ func (a *api) RemoveRunner(ctx context.Context, request *server.RemoveRunnerRequ
 	return &server.RemoveRunnerResponse{}, nil
 }
 
+// DescribeRunner returns info by singe runner
+func (a *api) DescribeRunner(ctx context.Context, request *server.DescribeRunnerRequest) (*server.DescribeRunnerResponse, error) {
+	log.Info().Str("action", "list runners").Send()
+
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	runner, err := a.repo.DescribeRunner(ctx, request.Guid)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "failed to list runners")
+	}
+
+	grpcRunner := &server.Runner{
+		Guid: runner.Guid,
+		Os:   runner.Os,
+		Arch: runner.Arch,
+	}
+
+	metrics.IncMethodsCalls("DescribeRunner")
+
+	return &server.DescribeRunnerResponse{Runner: grpcRunner}, nil
+}
+
 // ListRunners returns list of all existing runners
 func (a *api) ListRunners(ctx context.Context, request *server.ListFiltersRequest) (*server.RunnersListResponse, error) {
 	log.Info().Str("action", "list runners").Send()
+
+	if err := request.Validate(); err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
 
 	runners, err := a.repo.ListRunners(ctx, request)
 	if err != nil {

@@ -16,6 +16,7 @@ type Repo interface {
 	AddRunners(ctx context.Context, runner []*models.Runner) error
 	UpdateRunner(ctx context.Context, runner *models.Runner) error
 	RemoveRunner(ctx context.Context, guid string) error
+	DescribeRunner(ctx context.Context, guid string) (*models.Runner, error)
 	ListRunners(ctx context.Context, filters *server.ListFiltersRequest) ([]*models.Runner, error)
 	Close()
 }
@@ -92,6 +93,25 @@ func (r *repo) RemoveRunner(ctx context.Context, guid string) error {
 	_, err := query.ExecContext(ctx)
 
 	return err
+}
+
+// DescribeRunner returns single runner by guid
+func (r *repo) DescribeRunner(_ context.Context, guid string) (*models.Runner, error) {
+	query := squirrel.
+		Select("*").
+		From("runners").
+		Where(squirrel.Eq{"guid": guid}).
+		RunWith(r.db).
+		PlaceholderFormat(squirrel.Dollar)
+
+	row := query.QueryRow()
+
+	var runner models.Runner
+	if err := row.Scan(&runner.Guid, &runner.Os, &runner.Arch); err != nil {
+		return nil, err
+	}
+
+	return &runner, nil
 }
 
 // ListRunners returns list of runners

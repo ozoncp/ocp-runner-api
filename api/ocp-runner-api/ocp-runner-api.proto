@@ -1,21 +1,57 @@
 syntax = "proto3";
 
+import "google/api/annotations.proto";
+import "github.com/envoyproxy/protoc-gen-validate/validate/validate.proto";
+
 package ocp.runner.api;
 
 option go_package = "github.com/ozoncp/ocp-runner-api/pkg/ocp-runner-api;ocp_runner_api";
 
 service OcpRunnerService {
-  rpc CreateRunner(CreateRunnerRequest)            returns (CreateRunnerResponse);
-  rpc MultiCreateRunner(MultiCreateRunnerRequest)  returns (MultiCreateRunnerResponse);
-  rpc UpdateRunner(UpdateRunnerRequest)            returns (UpdateRunnerResponse);
-  rpc RemoveRunner(RemoveRunnerRequest)            returns (RemoveRunnerResponse);
-  rpc ListRunners(ListFiltersRequest)              returns (RunnersListResponse);
+  rpc CreateRunner(CreateRunnerRequest) returns (CreateRunnerResponse) {
+      option (google.api.http) = {
+        post: "/runners/create",
+        body: "*"
+      };
+  }
+
+  rpc MultiCreateRunner(MultiCreateRunnerRequest) returns (MultiCreateRunnerResponse) {
+    option (google.api.http) = {
+      post: "/runners/multi_create",
+      body: "*"
+    };
+  }
+
+  rpc UpdateRunner(UpdateRunnerRequest) returns (UpdateRunnerResponse) {
+    option (google.api.http) = {
+      patch: "/runners/update",
+      body: "*"
+    };
+  }
+
+  rpc RemoveRunner(RemoveRunnerRequest) returns (RemoveRunnerResponse) {
+    option (google.api.http) = {
+      delete: "/runners/delete/{guid}",
+    };
+  }
+
+  rpc DescribeRunner(DescribeRunnerRequest) returns (DescribeRunnerResponse) {
+    option (google.api.http) = {
+      get: "/runners/describe/{guid}"
+    };
+  }
+
+  rpc ListRunners(ListFiltersRequest) returns (RunnersListResponse) {
+    option (google.api.http) = {
+      get: "/runners/list/guids/{guids}/os/{os}/arch/{arch}",
+    };
+  }
 }
 
 // CREATE
 message CreateRunnerRequest {
-  string os = 1;
-  string arch = 2;
+  string os = 1 [(validate.rules).string.min_len = 3];
+  string arch = 2 [(validate.rules).string.min_len = 3];
 }
 
 message CreateRunnerResponse {
@@ -25,14 +61,14 @@ message CreateRunnerResponse {
 // MULTI CREATE
 message MultiCreateRunnerRequest {
   repeated CreateRunnerRequest runners = 1;
-  int32 batchSize = 2;
+  int32 batchSize = 2 [(validate.rules).int32.gt = 0];
 }
 
 message MultiCreateRunnerResponse {}
 
 // UPDATE
 message UpdateRunnerRequest {
-  string guid = 1;
+  string guid = 1 [(validate.rules).string.min_len = 10];
   string os = 2;
   string arch = 3;
 }
@@ -41,10 +77,19 @@ message UpdateRunnerResponse {}
 
 // REMOVE
 message RemoveRunnerRequest {
-  string guid = 1;
+  string guid = 1 [(validate.rules).string.min_len = 10];
 }
 
 message RemoveRunnerResponse {}
+
+// DESCRIBE
+message DescribeRunnerRequest {
+  string guid = 1 [(validate.rules).string.min_len = 10];
+}
+
+message DescribeRunnerResponse {
+  Runner runner = 1;
+}
 
 // LIST
 message ListFiltersRequest {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/Shopify/sarama"
+	"github.com/rs/zerolog/log"
 
 	"github.com/ozoncp/ocp-runner-api/internal/models"
 )
@@ -20,7 +21,7 @@ func NewProducer() Producer {
 }
 
 type producer struct {
-	sp sarama.SyncProducer
+	sp sarama.AsyncProducer
 }
 
 // Init initialize broker
@@ -30,11 +31,12 @@ func (p *producer) Init(brokers []string) error {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Return.Successes = true
 
-	prod, err := sarama.NewSyncProducer(brokers, config)
+	prod, err := sarama.NewAsyncProducer(brokers, config)
 	if err != nil {
 		return err
 	}
 	p.sp = prod
+
 	return nil
 }
 
@@ -44,8 +46,17 @@ func (p *producer) SendMessage(topic string, event *models.RunnerEvent) error {
 	if err != nil {
 		return err
 	}
-	_, _, err = p.sp.SendMessage(message)
-	return err
+
+	p.sp.Input() <- message
+
+	select {
+	case msg := <-p.sp.Successes():
+		log.Info().Msgf("message successfully published: %v", msg.Value)
+		return nil
+	case err := <-p.sp.Errors():
+		log.Error().Err(err).Send()
+		return err
+	}
 }
 
 // prepareMessage prepares runner event message to sending

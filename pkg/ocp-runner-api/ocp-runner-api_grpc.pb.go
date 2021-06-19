@@ -22,6 +22,7 @@ type OcpRunnerServiceClient interface {
 	MultiCreateRunner(ctx context.Context, in *MultiCreateRunnerRequest, opts ...grpc.CallOption) (*MultiCreateRunnerResponse, error)
 	UpdateRunner(ctx context.Context, in *UpdateRunnerRequest, opts ...grpc.CallOption) (*UpdateRunnerResponse, error)
 	RemoveRunner(ctx context.Context, in *RemoveRunnerRequest, opts ...grpc.CallOption) (*RemoveRunnerResponse, error)
+	DescribeRunner(ctx context.Context, in *DescribeRunnerRequest, opts ...grpc.CallOption) (*DescribeRunnerResponse, error)
 	ListRunners(ctx context.Context, in *ListFiltersRequest, opts ...grpc.CallOption) (*RunnersListResponse, error)
 }
 
@@ -69,6 +70,15 @@ func (c *ocpRunnerServiceClient) RemoveRunner(ctx context.Context, in *RemoveRun
 	return out, nil
 }
 
+func (c *ocpRunnerServiceClient) DescribeRunner(ctx context.Context, in *DescribeRunnerRequest, opts ...grpc.CallOption) (*DescribeRunnerResponse, error) {
+	out := new(DescribeRunnerResponse)
+	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/DescribeRunner", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ocpRunnerServiceClient) ListRunners(ctx context.Context, in *ListFiltersRequest, opts ...grpc.CallOption) (*RunnersListResponse, error) {
 	out := new(RunnersListResponse)
 	err := c.cc.Invoke(ctx, "/ocp.runner.api.OcpRunnerService/ListRunners", in, out, opts...)
@@ -86,6 +96,7 @@ type OcpRunnerServiceServer interface {
 	MultiCreateRunner(context.Context, *MultiCreateRunnerRequest) (*MultiCreateRunnerResponse, error)
 	UpdateRunner(context.Context, *UpdateRunnerRequest) (*UpdateRunnerResponse, error)
 	RemoveRunner(context.Context, *RemoveRunnerRequest) (*RemoveRunnerResponse, error)
+	DescribeRunner(context.Context, *DescribeRunnerRequest) (*DescribeRunnerResponse, error)
 	ListRunners(context.Context, *ListFiltersRequest) (*RunnersListResponse, error)
 	mustEmbedUnimplementedOcpRunnerServiceServer()
 }
@@ -105,6 +116,9 @@ func (UnimplementedOcpRunnerServiceServer) UpdateRunner(context.Context, *Update
 }
 func (UnimplementedOcpRunnerServiceServer) RemoveRunner(context.Context, *RemoveRunnerRequest) (*RemoveRunnerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveRunner not implemented")
+}
+func (UnimplementedOcpRunnerServiceServer) DescribeRunner(context.Context, *DescribeRunnerRequest) (*DescribeRunnerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DescribeRunner not implemented")
 }
 func (UnimplementedOcpRunnerServiceServer) ListRunners(context.Context, *ListFiltersRequest) (*RunnersListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRunners not implemented")
@@ -194,6 +208,24 @@ func _OcpRunnerService_RemoveRunner_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OcpRunnerService_DescribeRunner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DescribeRunnerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OcpRunnerServiceServer).DescribeRunner(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ocp.runner.api.OcpRunnerService/DescribeRunner",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OcpRunnerServiceServer).DescribeRunner(ctx, req.(*DescribeRunnerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _OcpRunnerService_ListRunners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListFiltersRequest)
 	if err := dec(in); err != nil {
@@ -234,6 +266,10 @@ var OcpRunnerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveRunner",
 			Handler:    _OcpRunnerService_RemoveRunner_Handler,
+		},
+		{
+			MethodName: "DescribeRunner",
+			Handler:    _OcpRunnerService_DescribeRunner_Handler,
 		},
 		{
 			MethodName: "ListRunners",

@@ -41,9 +41,19 @@ func (m *CreateRunnerRequest) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Os
+	if utf8.RuneCountInString(m.GetOs()) < 3 {
+		return CreateRunnerRequestValidationError{
+			field:  "Os",
+			reason: "value length must be at least 3 runes",
+		}
+	}
 
-	// no validation rules for Arch
+	if utf8.RuneCountInString(m.GetArch()) < 3 {
+		return CreateRunnerRequestValidationError{
+			field:  "Arch",
+			reason: "value length must be at least 3 runes",
+		}
+	}
 
 	return nil
 }
@@ -196,7 +206,12 @@ func (m *MultiCreateRunnerRequest) Validate() error {
 
 	}
 
-	// no validation rules for BatchSize
+	if m.GetBatchSize() <= 0 {
+		return MultiCreateRunnerRequestValidationError{
+			field:  "BatchSize",
+			reason: "value must be greater than 0",
+		}
+	}
 
 	return nil
 }
@@ -332,7 +347,12 @@ func (m *UpdateRunnerRequest) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Guid
+	if utf8.RuneCountInString(m.GetGuid()) < 10 {
+		return UpdateRunnerRequestValidationError{
+			field:  "Guid",
+			reason: "value length must be at least 10 runes",
+		}
+	}
 
 	// no validation rules for Os
 
@@ -472,7 +492,12 @@ func (m *RemoveRunnerRequest) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Guid
+	if utf8.RuneCountInString(m.GetGuid()) < 10 {
+		return RemoveRunnerRequestValidationError{
+			field:  "Guid",
+			reason: "value length must be at least 10 runes",
+		}
+	}
 
 	return nil
 }
@@ -599,6 +624,157 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = RemoveRunnerResponseValidationError{}
+
+// Validate checks the field values on DescribeRunnerRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *DescribeRunnerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if utf8.RuneCountInString(m.GetGuid()) < 10 {
+		return DescribeRunnerRequestValidationError{
+			field:  "Guid",
+			reason: "value length must be at least 10 runes",
+		}
+	}
+
+	return nil
+}
+
+// DescribeRunnerRequestValidationError is the validation error returned by
+// DescribeRunnerRequest.Validate if the designated constraints aren't met.
+type DescribeRunnerRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DescribeRunnerRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DescribeRunnerRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DescribeRunnerRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DescribeRunnerRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DescribeRunnerRequestValidationError) ErrorName() string {
+	return "DescribeRunnerRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DescribeRunnerRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDescribeRunnerRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DescribeRunnerRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DescribeRunnerRequestValidationError{}
+
+// Validate checks the field values on DescribeRunnerResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *DescribeRunnerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetRunner()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return DescribeRunnerResponseValidationError{
+				field:  "Runner",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// DescribeRunnerResponseValidationError is the validation error returned by
+// DescribeRunnerResponse.Validate if the designated constraints aren't met.
+type DescribeRunnerResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DescribeRunnerResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DescribeRunnerResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DescribeRunnerResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DescribeRunnerResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DescribeRunnerResponseValidationError) ErrorName() string {
+	return "DescribeRunnerResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DescribeRunnerResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDescribeRunnerResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DescribeRunnerResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DescribeRunnerResponseValidationError{}
 
 // Validate checks the field values on ListFiltersRequest with the rules
 // defined in the proto definition for this message. If any rules are

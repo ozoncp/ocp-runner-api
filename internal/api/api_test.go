@@ -74,7 +74,7 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Context("if describe method called", func() {
+	Context("if update method called", func() {
 		var (
 			request  *server.UpdateRunnerRequest
 			response *server.UpdateRunnerResponse
@@ -82,7 +82,7 @@ var _ = Describe("Api", func() {
 
 		BeforeEach(func() {
 			request = &server.UpdateRunnerRequest{
-				Guid: "not_empty",
+				Guid: "test-11eb-be48-0242ac160006",
 				Os:   "new_val",
 				Arch: "new_val",
 			}
@@ -101,7 +101,7 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Context("if describe method called with one field", func() {
+	Context("if update method called with one field", func() {
 		var (
 			request  *server.UpdateRunnerRequest
 			response *server.UpdateRunnerResponse
@@ -109,7 +109,7 @@ var _ = Describe("Api", func() {
 
 		BeforeEach(func() {
 			request = &server.UpdateRunnerRequest{
-				Guid: "not_empty",
+				Guid: "test-11eb-be48-0242ac160006",
 				Os:   "new_val",
 			}
 
@@ -127,7 +127,7 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Context("if describe method called without guid", func() {
+	Context("if update method called without guid", func() {
 		var (
 			request  *server.UpdateRunnerRequest
 			response *server.UpdateRunnerResponse
@@ -144,14 +144,14 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Context("if describe method called without any new fields", func() {
+	Context("if update method called without any new fields", func() {
 		var (
 			request  *server.UpdateRunnerRequest
 			response *server.UpdateRunnerResponse
 		)
 
 		BeforeEach(func() {
-			request = &server.UpdateRunnerRequest{Guid: "some_guid"}
+			request = &server.UpdateRunnerRequest{Guid: "test-11eb-be48-0242ac160006"}
 
 			dbMock.
 				ExpectExec("UPDATE runners").
@@ -174,7 +174,7 @@ var _ = Describe("Api", func() {
 		)
 
 		BeforeEach(func() {
-			request = &server.RemoveRunnerRequest{Guid: "some_guid"}
+			request = &server.RemoveRunnerRequest{Guid: "test-11eb-be48-0242ac160006"}
 
 			dbMock.
 				ExpectExec("DELETE FROM runners").
@@ -213,6 +213,49 @@ var _ = Describe("Api", func() {
 		})
 	})
 
+	Context("if describe method called", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			const guid string = "test-11eb-be48-0242ac160006"
+			request = &server.DescribeRunnerRequest{Guid: guid}
+
+			rows := sqlxmock.
+				NewRows([]string{"guid", "os", "arch"}).
+				AddRow(guid, "windows", "x64")
+			dbMock.
+				ExpectQuery("^SELECT (.+) FROM runners").
+				WillReturnRows(rows)
+
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be no errors", func() {
+			Expect(response).ShouldNot(BeNil())
+			Expect(err).Should(BeNil())
+		})
+	})
+
+	Context("if describe method called without guid", func() {
+		var (
+			request  *server.DescribeRunnerRequest
+			response *server.DescribeRunnerResponse
+		)
+
+		BeforeEach(func() {
+			request = &server.DescribeRunnerRequest{}
+			response, err = service.DescribeRunner(ctx, request)
+		})
+
+		It("should be error", func() {
+			Expect(response).Should(BeNil())
+			Expect(err).ShouldNot(BeNil())
+		})
+	})
+
 	Context("if list method called without filters", func() {
 		var (
 			request  *server.ListFiltersRequest
@@ -224,9 +267,9 @@ var _ = Describe("Api", func() {
 
 			rows := sqlxmock.
 				NewRows([]string{"guid", "os", "arch"}).
-				AddRow("some_guid_1", "windows", "x64").
-				AddRow("some_guid_2", "linux", "x64").
-				AddRow("some_guid_3", "macOS", "x64")
+				AddRow("test-11eb-be48-0242ac160006", "windows", "x64").
+				AddRow("test-21eb-be48-0242ac160006", "linux", "x64").
+				AddRow("test-31eb-be48-0242ac160006", "macOS", "x64")
 			dbMock.
 				ExpectQuery("^SELECT (.+) FROM runners").
 				WillReturnRows(rows)
@@ -248,7 +291,7 @@ var _ = Describe("Api", func() {
 		)
 
 		BeforeEach(func() {
-			const guid string = "some_guid"
+			const guid string = "test-11eb-be48-0242ac160006"
 			request = &server.ListFiltersRequest{Guids: []string{guid}}
 
 			rows := sqlxmock.

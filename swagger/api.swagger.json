@@ -10,7 +10,221 @@
   "produces": [
     "application/json"
   ],
-  "paths": {},
+  "paths": {
+    "/runners/create": {
+      "post": {
+        "operationId": "OcpRunnerService_CreateRunner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiCreateRunnerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiCreateRunnerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    },
+    "/runners/delete/{guid}": {
+      "delete": {
+        "operationId": "OcpRunnerService_RemoveRunner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiRemoveRunnerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "guid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    },
+    "/runners/describe/{guid}": {
+      "get": {
+        "operationId": "OcpRunnerService_DescribeRunner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiDescribeRunnerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "guid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    },
+    "/runners/list/guids/{guids}/os/{os}/arch/{arch}": {
+      "get": {
+        "operationId": "OcpRunnerService_ListRunners",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiRunnersListResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "guids",
+            "in": "path",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "minItems": 1
+          },
+          {
+            "name": "os",
+            "in": "path",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "minItems": 1
+          },
+          {
+            "name": "arch",
+            "in": "path",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv",
+            "minItems": 1
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    },
+    "/runners/multi_create": {
+      "post": {
+        "operationId": "OcpRunnerService_MultiCreateRunner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiMultiCreateRunnerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiMultiCreateRunnerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    },
+    "/runners/update": {
+      "patch": {
+        "operationId": "OcpRunnerService_UpdateRunner",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiUpdateRunnerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiUpdateRunnerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "OcpRunnerService"
+        ]
+      }
+    }
+  },
   "definitions": {
     "apiCreateRunnerRequest": {
       "type": "object",
@@ -31,6 +245,30 @@
           "type": "string"
         }
       }
+    },
+    "apiDescribeRunnerResponse": {
+      "type": "object",
+      "properties": {
+        "runner": {
+          "$ref": "#/definitions/apiRunner"
+        }
+      }
+    },
+    "apiMultiCreateRunnerRequest": {
+      "type": "object",
+      "properties": {
+        "runners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiCreateRunnerRequest"
+          }
+        },
+        "batchSize": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "MULTI CREATE"
     },
     "apiMultiCreateRunnerResponse": {
       "type": "object"
@@ -62,6 +300,21 @@
           }
         }
       }
+    },
+    "apiUpdateRunnerRequest": {
+      "type": "object",
+      "properties": {
+        "guid": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        }
+      },
+      "title": "UPDATE"
     },
     "apiUpdateRunnerResponse": {
       "type": "object"
