@@ -158,6 +158,9 @@ func (a *api) DescribeRunner(ctx context.Context, request *server.DescribeRunner
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "failed to list runners")
 	}
+	if runner == nil {
+		return nil, status.Errorf(codes.NotFound, "runner %v not found", request.Guid)
+	}
 
 	grpcRunner := &server.Runner{
 		Guid: runner.Guid,

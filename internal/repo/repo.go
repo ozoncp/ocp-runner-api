@@ -96,7 +96,7 @@ func (r *repo) RemoveRunner(ctx context.Context, guid string) error {
 }
 
 // DescribeRunner returns single runner by guid
-func (r *repo) DescribeRunner(_ context.Context, guid string) (*models.Runner, error) {
+func (r *repo) DescribeRunner(ctx context.Context, guid string) (*models.Runner, error) {
 	query := squirrel.
 		Select("*").
 		From("runners").
@@ -104,7 +104,7 @@ func (r *repo) DescribeRunner(_ context.Context, guid string) (*models.Runner, e
 		RunWith(r.db).
 		PlaceholderFormat(squirrel.Dollar)
 
-	row := query.QueryRow()
+	row := query.QueryRowContext(ctx)
 
 	var runner models.Runner
 	if err := row.Scan(&runner.Guid, &runner.Os, &runner.Arch); err != nil {
